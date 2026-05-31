@@ -478,36 +478,61 @@ Week 4: Retention (loyalty, repeat clicks, referrals)
 
 Focus on building an audience AND generating affiliate sales simultaneously.`,
 
-  13: `SECTION 13 — VOICEOVER SCRIPTS (30 total)
+  13: `SECTION 13 — VOICEOVER SCRIPTS
 
-Write complete, ready-to-record voiceover scripts. Each must feel natural when spoken aloud — conversational, punchy, no corporate speak. Include delivery notes in [brackets].
+YOU MUST WRITE EXACTLY 30 COMPLETE SCRIPTS. DO NOT STOP EARLY. DO NOT SUMMARIZE. WRITE EVERY SINGLE SCRIPT IN FULL.
 
-TIKTOK VOICEOVER SCRIPTS (10 scripts, 30-45 seconds each)
-Number each. Format:
-HOOK (0-3 sec): [the opening line spoken with energy]
-BODY (3-35 sec): [the main content, broken into short punchy sentences]
-CTA (35-45 sec): [clear call to action]
-DELIVERY NOTE: [tone, pace, energy level]
+10 TIKTOK SCRIPTS + 10 INSTAGRAM REEL SCRIPTS + 10 YOUTUBE SHORTS SCRIPTS = 30 TOTAL.
+
+Write complete, ready-to-record voiceover scripts. Natural when spoken aloud — conversational, punchy, no corporate speak.
 
 ---
 
-INSTAGRAM REEL VOICEOVER SCRIPTS (10 scripts, 15-30 seconds each)
-Number each. Format:
-HOOK (0-3 sec): [pattern interrupt opening]
-BODY (3-25 sec): [tight, visual storytelling]
-CTA (25-30 sec): [one clear action]
-DELIVERY NOTE: [tone, pace, energy level]
+TIKTOK VOICEOVER SCRIPTS — SCRIPTS 1 THROUGH 10 (30-45 seconds each)
+
+For each script use this exact format:
+SCRIPT [number]
+HOOK: [opening line, spoken with energy]
+BODY: [main content in short punchy sentences]
+CTA: [clear call to action]
+DELIVERY: [tone, pace, energy level]
+
+Write all 10 TikTok scripts before moving on.
 
 ---
 
-YOUTUBE SHORTS VOICEOVER SCRIPTS (10 scripts, 45-60 seconds each)
-Number each. Format:
-HOOK (0-3 sec): [bold claim or question]
-BODY (3-50 sec): [value-packed content with a clear narrative arc]
-CTA (50-60 sec): [subscribe prompt + action]
-DELIVERY NOTE: [tone, pace, energy level]
+INSTAGRAM REEL VOICEOVER SCRIPTS — SCRIPTS 11 THROUGH 20 (15-30 seconds each)
 
-All scripts must be specific to the offer. Write them as if a confident, knowledgeable creator is speaking directly to the target audience. Vary the angles: some educational, some story-based, some shocking, some aspirational.`
+For each script use this exact format:
+SCRIPT [number]
+HOOK: [pattern interrupt opening]
+BODY: [tight visual storytelling]
+CTA: [one clear action]
+DELIVERY: [tone, pace, energy level]
+
+Write all 10 Reel scripts before moving on.
+
+---
+
+YOUTUBE SHORTS VOICEOVER SCRIPTS — SCRIPTS 21 THROUGH 30 (45-60 seconds each)
+
+For each script use this exact format:
+SCRIPT [number]
+HOOK: [bold claim or question]
+BODY: [value-packed content with clear narrative arc]
+CTA: [subscribe prompt plus action]
+DELIVERY: [tone, pace, energy level]
+
+Write all 10 YouTube Shorts scripts.
+
+---
+
+RULES:
+- Number scripts 1 through 30 sequentially across all three platforms
+- Every script must be complete — no placeholders, no "repeat above format"
+- Vary angles across all 30: educational, story-based, shocking, aspirational, fear, curiosity
+- All scripts specific to the offer — no generic content
+- Plain text only, no markdown`
 };
 
 let allOutputs = {};
@@ -674,6 +699,14 @@ CRITICAL FORMATTING RULE: Use plain text only. No markdown. No # headers, no ## 
   document.getElementById('progress-text').textContent = `✓ All ${toGen.length} sections complete`;
   setTimeout(() => { document.getElementById('progress-wrap').style.display = 'none'; }, 2000);
 
+  // Force-clear any stuck generating states
+  toGen.forEach(id => {
+    const el = document.getElementById('nav-'+id);
+    if (el && el.classList.contains('generating')) {
+      el.className = 'nav-item done';
+    }
+  });
+
   document.getElementById('run-btn').disabled = false;
   document.getElementById('run-btn').textContent = '⚡ Regenerate';
   showToast('✓ Hook Bank complete!');
@@ -763,6 +796,14 @@ function jumpToSection(id) {
   document.getElementById('nav-'+id).classList.add('active');
 
   if (id === 0) { showSetup(); return; }
+
+  // If results are showing, just switch tab — never hide them
+  const resultsVisible = document.getElementById('page-results').style.display !== 'none';
+  if (resultsVisible) {
+    const tab = document.getElementById('tab-'+id);
+    if (tab) { switchTab(id); return; }
+  }
+
   if (Object.keys(allOutputs).length === 0) { showSetup(); return; }
   showResults();
   switchTab(id);
