@@ -721,7 +721,9 @@ function setNavState(id, state) {
 function showResults() {
   document.getElementById('page-0').style.display = 'none';
   document.getElementById('page-results').style.display = 'block';
-  buildTabsIfNeeded();
+  // Only build tabs once — never rebuild or content gets wiped
+  const tabsEl = document.getElementById('output-tabs');
+  if (!tabsEl.hasChildNodes()) buildTabsIfNeeded();
 }
 
 function showSetup() {
