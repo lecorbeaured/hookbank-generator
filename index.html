@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HookBank.ai — Powered by AI</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e0e10'/%3E%3Ccircle cx='16' cy='10' r='4' fill='none' stroke='%23e03c3c' stroke-width='2'/%3E%3Cpath d='M16 14 Q8 18 10 26' fill='none' stroke='%23e03c3c' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M10 26 L8 28 M10 26 L13 27' fill='none' stroke='%23ff6b35' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<title>Hook Bank Generator — Powered by AI</title>
 <style>
   :root {
     --bg: #0e0e10;
@@ -39,12 +38,6 @@
   .api-input:focus { outline: none; border-color: var(--accent); }
   .model-select { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 7px 10px; font-size: 13px; margin-top: 8px; }
   .model-select:focus { outline: none; }
-  .key-status { display:flex; align-items:center; gap:6px; font-size:11px; margin-top:7px; padding:5px 8px; border-radius:var(--radius-sm); }
-  .key-status.saved { background:#0d2318; color:#4ade80; border:1px solid #14532d; }
-  .key-status.missing { background:#1c0e0e; color:#f87171; border:1px solid #3b1919; }
-  .key-status-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
-  .key-status.saved .key-status-dot { background:#22c55e; }
-  .key-status.missing .key-status-dot { background:#e03c3c; }
 
   .section-nav { padding: 1rem 1.25rem; flex: 1; }
   .nav-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; padding-left: 4px; }
@@ -170,7 +163,7 @@
     <div class="api-box">
       <label>OpenRouter API Key</label>
       <input type="password" class="api-input" id="api-key" placeholder="sk-or-v1-..." oninput="saveKey(this.value)">
-      <select class="model-select" id="model-select" onchange="saveModel(this.value)">
+      <select class="model-select" id="model-select">
         <option value="deepseek/deepseek-chat">DeepSeek V3 (cheapest, fast)</option>
         <option value="deepseek/deepseek-r1">DeepSeek R1 (reasoning)</option>
         <option value="anthropic/claude-sonnet-4-5">Claude Sonnet 4.5</option>
@@ -178,10 +171,6 @@
         <option value="openai/gpt-4o">GPT-4o</option>
         <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B (free)</option>
       </select>
-      <div class="key-status missing" id="key-status">
-        <div class="key-status-dot"></div>
-        <span id="key-status-text">No API key — enter key above</span>
-      </div>
     </div>
 
     <div class="section-nav">
@@ -482,46 +471,15 @@ let currentTabId = null;
 
 function saveKey(val) {
   try { localStorage.setItem('hookbank_apikey', val); } catch(e) {}
-  updateKeyStatus(val);
 }
 
 function loadKey() {
   try { return localStorage.getItem('hookbank_apikey') || ''; } catch(e) { return ''; }
 }
 
-function saveModel(val) {
-  try { localStorage.setItem('hookbank_model', val); } catch(e) {}
-}
-
-function loadModel() {
-  try { return localStorage.getItem('hookbank_model') || ''; } catch(e) { return ''; }
-}
-
-function updateKeyStatus(key) {
-  const el = document.getElementById('key-status');
-  const txt = document.getElementById('key-status-text');
-  if (!el || !txt) return;
-  if (key && key.length > 10) {
-    el.className = 'key-status saved';
-    const masked = key.slice(0, 8) + '••••••••' + key.slice(-4);
-    txt.textContent = 'Key saved — ' + masked;
-  } else {
-    el.className = 'key-status missing';
-    txt.textContent = 'No API key — enter key above';
-  }
-}
-
 window.addEventListener('load', () => {
   const k = loadKey();
   if (k) document.getElementById('api-key').value = k;
-  updateKeyStatus(k);
-
-  const m = loadModel();
-  const sel = document.getElementById('model-select');
-  if (m && sel) {
-    const opt = [...sel.options].find(o => o.value === m);
-    if (opt) sel.value = m;
-  }
 });
 
 function togglePick(el) {
