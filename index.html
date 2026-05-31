@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hook Bank Generator — Powered by AI</title>
+<title>HookBank.ai — Powered by AI</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e0e10'/%3E%3Ccircle cx='16' cy='10' r='4' fill='none' stroke='%23e03c3c' stroke-width='2'/%3E%3Cpath d='M16 14 Q8 18 10 26' fill='none' stroke='%23e03c3c' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M10 26 L8 28 M10 26 L13 27' fill='none' stroke='%23ff6b35' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
   :root {
     --bg: #0e0e10;
@@ -38,6 +39,12 @@
   .api-input:focus { outline: none; border-color: var(--accent); }
   .model-select { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 7px 10px; font-size: 13px; margin-top: 8px; }
   .model-select:focus { outline: none; }
+  .key-status { display:flex; align-items:center; gap:6px; font-size:11px; margin-top:7px; padding:5px 8px; border-radius:var(--radius-sm); }
+  .key-status.saved { background:#0d2318; color:#4ade80; border:1px solid #14532d; }
+  .key-status.missing { background:#1c0e0e; color:#f87171; border:1px solid #3b1919; }
+  .key-status-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .key-status.saved .key-status-dot { background:#22c55e; }
+  .key-status.missing .key-status-dot { background:#e03c3c; }
 
   .section-nav { padding: 1rem 1.25rem; flex: 1; }
   .nav-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; padding-left: 4px; }
@@ -157,13 +164,13 @@
   <aside class="sidebar">
     <div class="sidebar-header">
       <div class="logo"><div class="logo-dot"></div> HookBank.ai</div>
-      <div class="logo-sub">by Kane · Ogilvy · Halbert · Schwartz</div>
+
     </div>
 
     <div class="api-box">
       <label>OpenRouter API Key</label>
       <input type="password" class="api-input" id="api-key" placeholder="sk-or-v1-..." oninput="saveKey(this.value)">
-      <select class="model-select" id="model-select">
+      <select class="model-select" id="model-select" onchange="saveModel(this.value)">
         <option value="deepseek/deepseek-chat">DeepSeek V3 (cheapest, fast)</option>
         <option value="deepseek/deepseek-r1">DeepSeek R1 (reasoning)</option>
         <option value="anthropic/claude-sonnet-4-5">Claude Sonnet 4.5</option>
@@ -171,6 +178,10 @@
         <option value="openai/gpt-4o">GPT-4o</option>
         <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B (free)</option>
       </select>
+      <div class="key-status missing" id="key-status">
+        <div class="key-status-dot"></div>
+        <span id="key-status-text">No API key — enter key above</span>
+      </div>
     </div>
 
     <div class="section-nav">
@@ -188,6 +199,7 @@
       <div class="nav-item" id="nav-10" onclick="jumpToSection(10)"><div class="nav-num">10</div> Monetization</div>
       <div class="nav-item" id="nav-11" onclick="jumpToSection(11)"><div class="nav-num">11</div> Virality scores</div>
       <div class="nav-item" id="nav-12" onclick="jumpToSection(12)"><div class="nav-num">12</div> 30-day plan</div>
+      <div class="nav-item" id="nav-13" onclick="jumpToSection(13)"><div class="nav-num">13</div> Voiceover scripts</div>
     </div>
 
     <div class="sidebar-footer">
@@ -201,7 +213,7 @@
     <div id="page-0" class="page active">
       <div class="page-header">
         <div class="page-title">Build your Hook Bank</div>
-        <div class="page-sub">Paste your offer below. The AI will generate 500+ hooks, pins, emails, content ideas, and a 30-day plan.</div>
+        <div class="page-sub">Paste your offer below. The AI will generate 500+ hooks, pins, emails, voiceover scripts, content ideas, and a 30-day plan.</div>
       </div>
 
       <div class="offer-card">
@@ -225,6 +237,7 @@
           <div class="pick-btn selected" data-id="10" onclick="togglePick(this)"><span class="pick-icon">💎</span>Monetization</div>
           <div class="pick-btn selected" data-id="11" onclick="togglePick(this)"><span class="pick-icon">🔥</span>Virality</div>
           <div class="pick-btn selected" data-id="12" onclick="togglePick(this)"><span class="pick-icon">📅</span>30-day plan</div>
+          <div class="pick-btn selected" data-id="13" onclick="togglePick(this)"><span class="pick-icon">🎙️</span>Voiceovers</div>
         </div>
       </div>
 
@@ -273,7 +286,8 @@ const SECTION_NAMES = {
   1:'Core hook points', 2:'Hook bank (50)', 3:'Video hooks',
   4:'Pinterest hooks', 5:'Blog hooks', 6:'Email hooks',
   7:'Lead magnets', 8:'Social content (100)',
-  9:'Sales page', 10:'Monetization', 11:'Virality scores', 12:'30-day plan'
+  9:'Sales page', 10:'Monetization', 11:'Virality scores', 12:'30-day plan',
+  13:'Voiceover scripts'
 };
 
 const SECTION_PROMPTS = {
@@ -462,24 +476,86 @@ Week 2: Engagement (build trust, share proof, entertain)
 Week 3: Conversion (sell, overcome objections, urgency)
 Week 4: Retention (loyalty, repeat clicks, referrals)
 
-Focus on building an audience AND generating affiliate sales simultaneously.`
+Focus on building an audience AND generating affiliate sales simultaneously.`,
+
+  13: `SECTION 13 — VOICEOVER SCRIPTS (30 total)
+
+Write complete, ready-to-record voiceover scripts. Each must feel natural when spoken aloud — conversational, punchy, no corporate speak. Include delivery notes in [brackets].
+
+TIKTOK VOICEOVER SCRIPTS (10 scripts, 30-45 seconds each)
+Number each. Format:
+HOOK (0-3 sec): [the opening line spoken with energy]
+BODY (3-35 sec): [the main content, broken into short punchy sentences]
+CTA (35-45 sec): [clear call to action]
+DELIVERY NOTE: [tone, pace, energy level]
+
+---
+
+INSTAGRAM REEL VOICEOVER SCRIPTS (10 scripts, 15-30 seconds each)
+Number each. Format:
+HOOK (0-3 sec): [pattern interrupt opening]
+BODY (3-25 sec): [tight, visual storytelling]
+CTA (25-30 sec): [one clear action]
+DELIVERY NOTE: [tone, pace, energy level]
+
+---
+
+YOUTUBE SHORTS VOICEOVER SCRIPTS (10 scripts, 45-60 seconds each)
+Number each. Format:
+HOOK (0-3 sec): [bold claim or question]
+BODY (3-50 sec): [value-packed content with a clear narrative arc]
+CTA (50-60 sec): [subscribe prompt + action]
+DELIVERY NOTE: [tone, pace, energy level]
+
+All scripts must be specific to the offer. Write them as if a confident, knowledgeable creator is speaking directly to the target audience. Vary the angles: some educational, some story-based, some shocking, some aspirational.`
 };
 
 let allOutputs = {};
-let selectedSections = new Set(['1','2','3','4','5','6','7','8','9','10','11','12']);
+let selectedSections = new Set(['1','2','3','4','5','6','7','8','9','10','11','12','13']);
 let currentTabId = null;
 
 function saveKey(val) {
   try { localStorage.setItem('hookbank_apikey', val); } catch(e) {}
+  updateKeyStatus(val);
 }
 
 function loadKey() {
   try { return localStorage.getItem('hookbank_apikey') || ''; } catch(e) { return ''; }
 }
 
+function saveModel(val) {
+  try { localStorage.setItem('hookbank_model', val); } catch(e) {}
+}
+
+function loadModel() {
+  try { return localStorage.getItem('hookbank_model') || ''; } catch(e) { return ''; }
+}
+
+function updateKeyStatus(key) {
+  const el = document.getElementById('key-status');
+  const txt = document.getElementById('key-status-text');
+  if (!el || !txt) return;
+  if (key && key.length > 10) {
+    el.className = 'key-status saved';
+    const masked = key.slice(0, 8) + '••••••••' + key.slice(-4);
+    txt.textContent = 'Key saved — ' + masked;
+  } else {
+    el.className = 'key-status missing';
+    txt.textContent = 'No API key — enter key above';
+  }
+}
+
 window.addEventListener('load', () => {
   const k = loadKey();
   if (k) document.getElementById('api-key').value = k;
+  updateKeyStatus(k);
+
+  const m = loadModel();
+  const sel = document.getElementById('model-select');
+  if (m && sel) {
+    const opt = [...sel.options].find(o => o.value === m);
+    if (opt) sel.value = m;
+  }
 });
 
 function togglePick(el) {
