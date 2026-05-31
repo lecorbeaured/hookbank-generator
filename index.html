@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hook Bank Generator — Powered by AI</title>
+<style>
+  :root {
+    --bg: #0e0e10;
+    --bg2: #18181c;
+    --bg3: #22222a;
+    --border: #2e2e38;
+    --text: #f0f0f2;
+    --muted: #888896;
+    --accent: #e03c3c;
+    --accent2: #ff6b35;
+    --green: #22c55e;
+    --blue: #3b82f6;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+
+  /* LAYOUT */
+  .app { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+  .sidebar { background: var(--bg2); border-right: 1px solid var(--border); padding: 0; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .main { padding: 2rem; overflow-y: auto; }
+
+  /* SIDEBAR */
+  .sidebar-header { padding: 1.25rem 1.25rem 1rem; border-bottom: 1px solid var(--border); }
+  .logo { font-size: 18px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+  .logo-sub { font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 400; }
+  .api-box { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
+  .api-box label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .api-input { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 7px 10px; font-size: 13px; font-family: monospace; }
+  .api-input:focus { outline: none; border-color: var(--accent); }
+  .model-select { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 7px 10px; font-size: 13px; margin-top: 8px; }
+  .model-select:focus { outline: none; }
+
+  .section-nav { padding: 1rem 1.25rem; flex: 1; }
+  .nav-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; padding-left: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: var(--radius-sm); font-size: 13px; color: var(--muted); cursor: pointer; margin-bottom: 2px; transition: all 0.15s; position: relative; }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--bg3); color: var(--text); }
+  .nav-item.done::after { content: '✓'; position: absolute; right: 10px; font-size: 11px; color: var(--green); }
+  .nav-item.generating::after { content: ''; position: absolute; right: 10px; width: 8px; height: 8px; border: 1.5px solid var(--muted); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  .nav-num { width: 20px; height: 20px; border-radius: 50%; background: var(--bg3); font-size: 11px; display: flex; align-items: center; justify-content: center; color: var(--muted); flex-shrink: 0; }
+  .nav-item.done .nav-num { background: #14532d; color: var(--green); }
+  .nav-item.generating .nav-num { background: #3b1919; color: var(--accent); }
+
+  .sidebar-footer { padding: 1rem 1.25rem; border-top: 1px solid var(--border); }
+
+  /* MAIN */
+  .page-header { margin-bottom: 1.5rem; }
+  .page-title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .page-sub { font-size: 13px; color: var(--muted); }
+
+  /* OFFER INPUT */
+  .offer-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.5rem; }
+  .offer-card h2 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .offer-card p { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  textarea.offer-textarea { width: 100%; min-height: 140px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 12px; font-size: 13px; font-family: inherit; resize: vertical; line-height: 1.6; }
+  textarea.offer-textarea:focus { outline: none; border-color: var(--accent); }
+  textarea.offer-textarea::placeholder { color: var(--muted); }
+
+  /* SECTION PICKS */
+  .picks-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1.25rem; }
+  .pick-btn { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 12px; color: var(--muted); cursor: pointer; text-align: center; transition: all 0.15s; }
+  .pick-btn:hover { border-color: #444; color: var(--text); }
+  .pick-btn.selected { background: #1c1014; border-color: var(--accent); color: var(--text); }
+  .pick-btn .pick-icon { font-size: 18px; display: block; margin-bottom: 4px; }
+
+  /* CONTROLS */
+  .controls { display: flex; gap: 10px; margin-bottom: 2rem; flex-wrap: wrap; }
+  .btn { padding: 10px 20px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #c73232; }
+  .btn-primary:disabled { background: #4a2020; color: #886; cursor: not-allowed; transform: none; }
+  .btn-secondary { background: var(--bg2); border: 1px solid var(--border); color: var(--text); }
+  .btn-secondary:hover { background: var(--bg3); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; background: var(--bg3); border: 1px solid var(--border); color: var(--muted); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; }
+  .btn-sm:hover { color: var(--text); border-color: #555; }
+
+  /* PROGRESS */
+  .progress-wrap { margin-bottom: 1.5rem; display: none; }
+  .progress-bar { height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 0.4s ease; }
+  .progress-text { font-size: 12px; color: var(--muted); }
+
+  /* OUTPUT AREA */
+  .output-area { display: none; }
+  .output-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; overflow-x: auto; }
+  .tab { padding: 9px 16px; font-size: 13px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.15s; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+
+  .section-block { display: none; }
+  .section-block.active { display: block; }
+  .section-block h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
+  .section-block .section-meta { font-size: 12px; color: var(--muted); margin-bottom: 1rem; }
+
+  .out-content { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; white-space: pre-wrap; line-height: 1.9; font-size: 13.5px; color: var(--text); min-height: 100px; font-family: inherit; }
+  .out-content.loading { color: var(--muted); font-style: italic; animation: pulse 1.4s ease-in-out infinite; }
+
+  .action-row { display: flex; gap: 8px; margin-top: 10px; }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+  .empty-icon { font-size: 48px; margin-bottom: 1rem; }
+  .empty-title { font-size: 16px; color: var(--text); font-weight: 600; margin-bottom: 8px; }
+  .empty-desc { font-size: 13px; line-height: 1.6; max-width: 400px; margin: 0 auto; }
+
+  /* VIRALITY TABLE */
+  .viral-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .viral-table th { text-align: left; padding: 8px 10px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+  .viral-table td { padding: 10px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .viral-table tr:last-child td { border-bottom: none; }
+
+  /* SCORE BADGE */
+  .score { display: inline-block; padding: 2px 8px; border-radius: 100px; font-size: 11px; font-weight: 700; }
+  .score-high { background: #14532d; color: #4ade80; }
+  .score-mid { background: #433010; color: #fbbf24; }
+  .score-low { background: #3b1919; color: #f87171; }
+
+  /* TAG */
+  .tag { display: inline-block; padding: 2px 8px; background: var(--bg3); border: 1px solid var(--border); border-radius: 100px; font-size: 11px; color: var(--muted); margin: 2px; }
+
+  /* SAVED */
+  .saved-list { display: flex; flex-direction: column; gap: 8px; }
+  .saved-item { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; cursor: pointer; transition: border-color 0.15s; }
+  .saved-item:hover { border-color: #555; }
+  .saved-item-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .saved-item-meta { font-size: 11px; color: var(--muted); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 16px; font-size: 13px; color: var(--text); z-index: 9999; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 0.9; } }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; }
+    .picks-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo"><div class="logo-dot"></div> HookBank.ai</div>
+      <div class="logo-sub">by Kane · Ogilvy · Halbert · Schwartz</div>
+    </div>
+
+    <div class="api-box">
+      <label>OpenRouter API Key</label>
+      <input type="password" class="api-input" id="api-key" placeholder="sk-or-v1-..." oninput="saveKey(this.value)">
+      <select class="model-select" id="model-select">
+        <option value="deepseek/deepseek-chat">DeepSeek V3 (cheapest, fast)</option>
+        <option value="deepseek/deepseek-r1">DeepSeek R1 (reasoning)</option>
+        <option value="anthropic/claude-sonnet-4-5">Claude Sonnet 4.5</option>
+        <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
+        <option value="openai/gpt-4o">GPT-4o</option>
+        <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B (free)</option>
+      </select>
+    </div>
+
+    <div class="section-nav">
+      <div class="nav-label">Sections</div>
+      <div class="nav-item active" id="nav-0" onclick="jumpToSection(0)"><div class="nav-num">0</div> Offer setup</div>
+      <div class="nav-item" id="nav-1" onclick="jumpToSection(1)"><div class="nav-num">1</div> Core hook points</div>
+      <div class="nav-item" id="nav-2" onclick="jumpToSection(2)"><div class="nav-num">2</div> Hook bank (50)</div>
+      <div class="nav-item" id="nav-3" onclick="jumpToSection(3)"><div class="nav-num">3</div> Video hooks</div>
+      <div class="nav-item" id="nav-4" onclick="jumpToSection(4)"><div class="nav-num">4</div> Pinterest hooks</div>
+      <div class="nav-item" id="nav-5" onclick="jumpToSection(5)"><div class="nav-num">5</div> Blog hooks</div>
+      <div class="nav-item" id="nav-6" onclick="jumpToSection(6)"><div class="nav-num">6</div> Email hooks</div>
+      <div class="nav-item" id="nav-7" onclick="jumpToSection(7)"><div class="nav-num">7</div> Lead magnets</div>
+      <div class="nav-item" id="nav-8" onclick="jumpToSection(8)"><div class="nav-num">8</div> Social content</div>
+      <div class="nav-item" id="nav-9" onclick="jumpToSection(9)"><div class="nav-num">9</div> Sales page</div>
+      <div class="nav-item" id="nav-10" onclick="jumpToSection(10)"><div class="nav-num">10</div> Monetization</div>
+      <div class="nav-item" id="nav-11" onclick="jumpToSection(11)"><div class="nav-num">11</div> Virality scores</div>
+      <div class="nav-item" id="nav-12" onclick="jumpToSection(12)"><div class="nav-num">12</div> 30-day plan</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="btn btn-secondary" style="width:100%;font-size:12px" onclick="exportAll()">⬇ Export all as .txt</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- SETUP PAGE -->
+    <div id="page-0" class="page active">
+      <div class="page-header">
+        <div class="page-title">Build your Hook Bank</div>
+        <div class="page-sub">Paste your offer below. The AI will generate 500+ hooks, pins, emails, content ideas, and a 30-day plan.</div>
+      </div>
+
+      <div class="offer-card">
+        <h2>Your offer</h2>
+        <p>Describe your product, service, ebook, SaaS, affiliate site, newsletter, or idea. Include your audience, niche, and any context about pain points or competition.</p>
+        <textarea class="offer-textarea" id="offer-input" placeholder="Example: A Pinterest-to-Amazon affiliate site called KitchenPicksPro targeting busy home cooks who want to find the best kitchen appliances without wasting hours researching. We review espresso machines, air fryers, knife sets, stand mixers, and kitchen gadgets. Pain points: too many options, fake reviews, don't know which products last. Amazon Associate tag: ericcoste-20."></textarea>
+      </div>
+
+      <div style="margin-bottom:1rem">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em">Select sections to generate</div>
+        <div class="picks-grid" id="picks-grid">
+          <div class="pick-btn selected" data-id="1" onclick="togglePick(this)"><span class="pick-icon">🎯</span>Core hooks</div>
+          <div class="pick-btn selected" data-id="2" onclick="togglePick(this)"><span class="pick-icon">📋</span>Hook bank</div>
+          <div class="pick-btn selected" data-id="3" onclick="togglePick(this)"><span class="pick-icon">🎬</span>Video hooks</div>
+          <div class="pick-btn selected" data-id="4" onclick="togglePick(this)"><span class="pick-icon">📌</span>Pinterest</div>
+          <div class="pick-btn selected" data-id="5" onclick="togglePick(this)"><span class="pick-icon">📝</span>Blog hooks</div>
+          <div class="pick-btn selected" data-id="6" onclick="togglePick(this)"><span class="pick-icon">✉️</span>Email hooks</div>
+          <div class="pick-btn selected" data-id="7" onclick="togglePick(this)"><span class="pick-icon">🎁</span>Lead magnets</div>
+          <div class="pick-btn selected" data-id="8" onclick="togglePick(this)"><span class="pick-icon">📱</span>Social content</div>
+          <div class="pick-btn selected" data-id="9" onclick="togglePick(this)"><span class="pick-icon">💰</span>Sales page</div>
+          <div class="pick-btn selected" data-id="10" onclick="togglePick(this)"><span class="pick-icon">💎</span>Monetization</div>
+          <div class="pick-btn selected" data-id="11" onclick="togglePick(this)"><span class="pick-icon">🔥</span>Virality</div>
+          <div class="pick-btn selected" data-id="12" onclick="togglePick(this)"><span class="pick-icon">📅</span>30-day plan</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-secondary" onclick="selectAll()">Select all</button>
+        <button class="btn btn-secondary" onclick="deselectAll()">Deselect all</button>
+        <button class="btn btn-primary" id="run-btn" onclick="runAll()">⚡ Generate Hook Bank</button>
+      </div>
+
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        <div class="progress-text" id="progress-text">Starting...</div>
+      </div>
+
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">🎣</div>
+        <div class="empty-title">Your hook bank is empty</div>
+        <div class="empty-desc">Paste your offer above, add your OpenRouter API key, select sections, and click Generate. Results appear in real-time as each section completes.</div>
+      </div>
+    </div>
+
+    <!-- RESULTS PAGE -->
+    <div id="page-results" class="page" style="display:none">
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <div class="page-title" id="results-title">Hook Bank</div>
+          <div class="page-sub" id="results-sub">Generated results</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-sm" onclick="showSetup()">← Back to setup</button>
+          <button class="btn-sm" onclick="copyCurrentSection()">📋 Copy section</button>
+          <button class="btn-sm" onclick="exportAll()">⬇ Export all</button>
+        </div>
+      </div>
+
+      <div class="output-tabs" id="output-tabs"></div>
+      <div id="output-sections"></div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SECTION_NAMES = {
+  1:'Core hook points', 2:'Hook bank (50)', 3:'Video hooks',
+  4:'Pinterest hooks', 5:'Blog hooks', 6:'Email hooks',
+  7:'Lead magnets', 8:'Social content (100)',
+  9:'Sales page', 10:'Monetization', 11:'Virality scores', 12:'30-day plan'
+};
+
+const SECTION_PROMPTS = {
+  1: `SECTION 1 — CORE HOOK POINT
+
+Analyze the offer, identify: target audience, pain points, frustrations, desires, goals, objections, dreams, emotional triggers.
+
+Then create exactly:
+• ONE primary Hook Point (the single most powerful positioning statement)
+• THREE alternative Hook Points
+• THREE contrarian Hook Points (challenge conventional wisdom)
+• THREE curiosity Hook Points (create irresistible intrigue)
+• THREE authority Hook Points (establish credibility instantly)
+• THREE urgency Hook Points (create immediate action)
+
+Format clearly with headers for each group. Be specific to the offer — no generic marketing speak.`,
+
+  2: `SECTION 2 — HOOK BANK: 50 SHORT-FORM HOOKS
+
+Create exactly 50 hooks, 5 per category, labeled clearly:
+
+CURIOSITY HOOKS (5)
+SHOCK HOOKS (5)
+CONTRARIAN HOOKS (5)
+MISTAKE HOOKS (5)
+HOW-TO HOOKS (5)
+STORY HOOKS (5)
+FEAR HOOKS (5)
+ASPIRATION HOOKS (5)
+IDENTITY HOOKS (5)
+SECRET HOOKS (5)
+
+Every hook must be stop-scroll worthy, punchy, and specific to this offer. No filler. No generic hooks.`,
+
+  3: `SECTION 3 — VIDEO HOOKS (90 total)
+
+Create hooks that grab attention in under 3 seconds.
+
+TIKTOK OPENING HOOKS (30)
+Number each. Start with action/conflict/shock. Written as spoken word.
+
+INSTAGRAM REEL OPENING HOOKS (30)
+Number each. Visual and aspirational. Strong pattern interrupts.
+
+YOUTUBE SHORTS OPENING HOOKS (30)
+Number each. Promise immediate value. Create curiosity loops.`,
+
+  4: `SECTION 4 — PINTEREST HOOKS (150 total)
+
+SEO-optimize all. Include keywords people actually search on Pinterest.
+
+PINTEREST TITLES (50)
+Number each. Under 100 characters. Keyword-rich. Clickable.
+
+PINTEREST TEXT OVERLAYS (50)
+Number each. Under 10 words. Bold statement that stops the scroll.
+
+PINTEREST DESCRIPTIONS (50)
+Number each. 2-3 sentences. Include primary keyword, secondary keyword, and call to action. SEO-optimized.`,
+
+  5: `SECTION 5 — BLOG HOOKS (150 total)
+
+BLOG POST TITLES (30)
+Number each. SEO-optimized. Curiosity + keyword.
+
+ARTICLE HEADLINES (30)
+Number each. Journalistic style. Newsworthy angle.
+
+LISTICLE IDEAS (30)
+Number each. "X ways/things/reasons/mistakes..." format.
+
+COMPARISON ARTICLES (30)
+Number each. "X vs Y" format. High search intent.
+
+PROBLEM-SOLUTION ARTICLES (30)
+Number each. Lead with the problem. Promise the solution.`,
+
+  6: `SECTION 6 — EMAIL HOOKS (60 total)
+
+CURIOSITY-BASED SUBJECT LINES (25)
+Number each. Open loops. Pattern interrupts. Intrigue.
+
+URGENCY-BASED SUBJECT LINES (25)
+Number each. Deadlines. Scarcity. Loss aversion. FOMO.
+
+EMAIL SEQUENCE IDEAS (10)
+Number each. Name the sequence + 5-7 email titles in the sequence + goal of the sequence.`,
+
+  7: `SECTION 7 — LEAD MAGNETS (100 total)
+
+FREEBIE IDEAS (20)
+Number each. Specific, desirable, instantly valuable.
+
+CHECKLIST IDEAS (20)
+Number each. Actionable, completable, specific to the niche.
+
+TEMPLATE IDEAS (20)
+Number each. Ready-to-use, time-saving, professional.
+
+CHEAT SHEET IDEAS (20)
+Number each. Quick-reference, visual, practical.
+
+MINI-GUIDE IDEAS (20)
+Number each. 5-10 page depth, focused on one specific problem.`,
+
+  8: `SECTION 8 — SOCIAL CONTENT IDEAS (100 total)
+
+EDUCATION (12): Teach something valuable about the niche.
+ENTERTAINMENT (12): Relatable, funny, or surprising content.
+INSPIRATION (12): Motivational angles tied to the transformation.
+AUTHORITY (12): Proof-based, data-driven, expert positioning.
+CASE STUDY (13): Real results, before/after, transformation stories.
+MYTH BUSTING (13): Challenge common misconceptions in the niche.
+FAQ (13): Answer real questions your audience Googles.
+STORYTELLING (13): Narrative content that builds connection.
+
+For each idea: give the format (Reel, Carousel, Thread, etc.) + a one-sentence description.`,
+
+  9: `SECTION 9 — SALES PAGE COPY
+
+HEADLINE:
+Write the single most powerful headline for this offer.
+
+SUBHEADLINE:
+A supporting sentence that deepens the hook.
+
+10 BENEFITS (with emotional framing):
+Number each. Feature → Benefit → Emotion. Show the transformation.
+
+10 OBJECTIONS + FULL OBJECTION HANDLING:
+Number each objection. Write 2-3 sentences of handling that neutralizes it completely.
+
+5 CTA VARIATIONS:
+Write 5 different call-to-action button texts with supporting micro-copy.`,
+
+  10: `SECTION 10 — MONETIZATION MAP
+
+For each item, provide:
+- Name and description
+- Ease of creation (1-10)
+- Revenue potential (1-10)
+- Speed to market (1-10)
+- Total score (sum)
+
+Cover ALL of these categories:
+DIGITAL PRODUCTS (5 ideas)
+COURSES (3 ideas)
+MEMBERSHIP IDEAS (3 ideas)
+SAAS OPPORTUNITIES (3 ideas)
+AFFILIATE OPPORTUNITIES (5 ideas)
+UPSELLS (3 ideas)
+DOWNSELLS (3 ideas)
+
+Sort each category by total score, highest first.`,
+
+  11: `SECTION 11 — VIRALITY SCORES
+
+Take the 20 most powerful hooks from ALL previous sections.
+
+For each hook, score on:
+• Curiosity (1-10)
+• Emotional impact (1-10)
+• Shareability (1-10)
+• Clickability (1-10)
+• Conversion potential (1-10)
+• TOTAL (out of 50)
+
+Format as a ranked table, highest total first.
+Mark the TOP 10 most likely to go viral with ⭐
+
+Include a "Why it works" note for each top-10 hook.`,
+
+  12: `SECTION 12 — 30-DAY CONTENT CALENDAR
+
+Create a complete daily content plan for 30 days.
+
+For EACH day (Day 1 through Day 30), provide:
+📱 TIKTOK: [specific video idea — topic, hook, format]
+📌 PINTEREST: [specific pin idea — product, overlay text, board]
+✉️ EMAIL: [subject line + one-sentence content summary]
+📝 BLOG: [specific article title + target keyword]
+
+Theme the weeks:
+Week 1: Awareness (introduce, educate, attract)
+Week 2: Engagement (build trust, share proof, entertain)
+Week 3: Conversion (sell, overcome objections, urgency)
+Week 4: Retention (loyalty, repeat clicks, referrals)
+
+Focus on building an audience AND generating affiliate sales simultaneously.`
+};
+
+let allOutputs = {};
+let selectedSections = new Set(['1','2','3','4','5','6','7','8','9','10','11','12']);
+let currentTabId = null;
+
+function saveKey(val) {
+  try { localStorage.setItem('hookbank_apikey', val); } catch(e) {}
+}
+
+function loadKey() {
+  try { return localStorage.getItem('hookbank_apikey') || ''; } catch(e) { return ''; }
+}
+
+window.addEventListener('load', () => {
+  const k = loadKey();
+  if (k) document.getElementById('api-key').value = k;
+});
+
+function togglePick(el) {
+  const id = el.dataset.id;
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) selectedSections.add(id);
+  else selectedSections.delete(id);
+}
+
+function selectAll() {
+  document.querySelectorAll('.pick-btn').forEach(b => { b.classList.add('selected'); selectedSections.add(b.dataset.id); });
+}
+
+function deselectAll() {
+  document.querySelectorAll('.pick-btn').forEach(b => { b.classList.remove('selected'); selectedSections.delete(b.dataset.id); });
+}
+
+function showToast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+async function callLLM(systemPrompt, userMsg) {
+  const key = document.getElementById('api-key').value.trim();
+  const model = document.getElementById('model-select').value;
+  if (!key) throw new Error('No API key');
+
+  const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${key}`,
+      'HTTP-Referer': 'https://hookbank.ai',
+      'X-Title': 'HookBank Generator'
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 4000,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMsg }
+      ]
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error(`API error ${resp.status}: ${err}`);
+  }
+
+  const data = await resp.json();
+  return data.choices?.[0]?.message?.content || '';
+}
+
+async function runAll() {
+  const offer = document.getElementById('offer-input').value.trim();
+  if (!offer) { showToast('⚠ Paste your offer first'); return; }
+
+  const key = document.getElementById('api-key').value.trim();
+  if (!key) { showToast('⚠ Add your OpenRouter API key'); return; }
+
+  const toGen = [...selectedSections].map(Number).filter(n => SECTION_PROMPTS[n]).sort((a,b)=>a-b);
+  if (!toGen.length) { showToast('⚠ Select at least one section'); return; }
+
+  document.getElementById('run-btn').disabled = true;
+  document.getElementById('run-btn').textContent = '⏳ Generating...';
+  document.getElementById('progress-wrap').style.display = 'block';
+  document.getElementById('empty-state').style.display = 'none';
+
+  allOutputs = {};
+  showResults();
+
+  const systemPrompt = `You are a world-class marketing expert — a fusion of Brendan Kane (viral content), David Ogilvy (advertising mastery), Gary Halbert (direct response), and Eugene Schwartz (copywriting psychology).
+
+THE OFFER:
+${offer}
+
+Before writing, mentally analyze:
+• Target audience (who exactly, demographics, psychographics)
+• Pain points (what keeps them up at night)
+• Frustrations (what have they already tried that failed)
+• Desires (what do they secretly want)
+• Goals (what transformation are they seeking)
+• Objections (why they might not buy)
+• Dreams (the ideal outcome)
+• Emotional triggers (what makes them act)
+
+Then produce the requested section with maximum specificity, creativity, and commercial power. Be brutally specific to THIS offer. No generic marketing templates. Output only the section content — no preamble, no meta-commentary.`;
+
+  for (let i = 0; i < toGen.length; i++) {
+    const id = toGen[i];
+    const pct = Math.round((i / toGen.length) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = `Generating section ${i+1} of ${toGen.length}: ${SECTION_NAMES[id]}...`;
+
+    setNavState(id, 'generating');
+    updateTabLoading(id, true);
+
+    try {
+      const result = await callLLM(systemPrompt, SECTION_PROMPTS[id]);
+      allOutputs[id] = result;
+      setNavState(id, 'done');
+      updateTabContent(id, result);
+    } catch(e) {
+      allOutputs[id] = `Error: ${e.message}\n\nPlease check your API key and try again.`;
+      setNavState(id, '');
+      updateTabContent(id, allOutputs[id]);
+    }
+  }
+
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('progress-text').textContent = `✓ All ${toGen.length} sections complete`;
+  setTimeout(() => { document.getElementById('progress-wrap').style.display = 'none'; }, 2000);
+
+  document.getElementById('run-btn').disabled = false;
+  document.getElementById('run-btn').textContent = '⚡ Regenerate';
+  showToast('✓ Hook Bank complete!');
+}
+
+function setNavState(id, state) {
+  const el = document.getElementById('nav-'+id);
+  if (!el) return;
+  el.className = 'nav-item' + (state ? ' '+state : '');
+}
+
+function showResults() {
+  document.getElementById('page-0').style.display = 'none';
+  document.getElementById('page-results').style.display = 'block';
+  buildTabsIfNeeded();
+}
+
+function showSetup() {
+  document.getElementById('page-0').style.display = 'block';
+  document.getElementById('page-results').style.display = 'none';
+}
+
+function buildTabsIfNeeded() {
+  const tabsEl = document.getElementById('output-tabs');
+  const sectionsEl = document.getElementById('output-sections');
+  tabsEl.innerHTML = '';
+  sectionsEl.innerHTML = '';
+
+  const toGen = [...selectedSections].map(Number).filter(n => SECTION_PROMPTS[n]).sort((a,b)=>a-b);
+
+  toGen.forEach((id, i) => {
+    const tab = document.createElement('div');
+    tab.className = 'tab' + (i === 0 ? ' active' : '');
+    tab.id = 'tab-'+id;
+    tab.textContent = SECTION_NAMES[id];
+    tab.onclick = () => switchTab(id);
+    tabsEl.appendChild(tab);
+
+    const sec = document.createElement('div');
+    sec.className = 'section-block' + (i === 0 ? ' active' : '');
+    sec.id = 'sec-'+id;
+    sec.innerHTML = `
+      <div class="out-content loading" id="out-${id}">Generating ${SECTION_NAMES[id]}...</div>
+      <div class="action-row">
+        <button class="btn-sm" onclick="copySection(${id})">📋 Copy</button>
+        <button class="btn-sm" onclick="downloadSection(${id})">⬇ Download</button>
+      </div>`;
+    sectionsEl.appendChild(sec);
+    if (i === 0) currentTabId = id;
+  });
+
+  updateResultsHeader();
+}
+
+function updateResultsHeader() {
+  const offer = document.getElementById('offer-input').value.trim();
+  const preview = offer.length > 80 ? offer.slice(0,80)+'...' : offer;
+  document.getElementById('results-title').textContent = 'Hook Bank';
+  document.getElementById('results-sub').textContent = preview || 'Generated results';
+}
+
+function updateTabLoading(id, loading) {
+  const el = document.getElementById('out-'+id);
+  if (!el) return;
+  if (loading) { el.className = 'out-content loading'; el.textContent = `Generating ${SECTION_NAMES[id]}...`; }
+}
+
+function updateTabContent(id, content) {
+  const el = document.getElementById('out-'+id);
+  if (!el) return;
+  el.className = 'out-content';
+  el.textContent = content;
+}
+
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section-block').forEach(s => s.classList.remove('active'));
+  const tab = document.getElementById('tab-'+id);
+  const sec = document.getElementById('sec-'+id);
+  if (tab) tab.classList.add('active');
+  if (sec) sec.classList.add('active');
+  currentTabId = id;
+}
+
+function jumpToSection(id) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('nav-'+id).classList.add('active');
+
+  if (id === 0) { showSetup(); return; }
+  if (Object.keys(allOutputs).length === 0) { showSetup(); return; }
+  showResults();
+  switchTab(id);
+}
+
+function copySection(id) {
+  const content = allOutputs[id] || '';
+  if (!content) { showToast('Nothing to copy yet'); return; }
+  navigator.clipboard.writeText(`=== ${SECTION_NAMES[id].toUpperCase()} ===\n\n${content}`)
+    .then(() => showToast('✓ Copied!'))
+    .catch(() => { prompt('Copy this:', content); });
+}
+
+function copyCurrentSection() {
+  if (currentTabId) copySection(currentTabId);
+}
+
+function downloadSection(id) {
+  const content = allOutputs[id] || '';
+  if (!content) { showToast('Nothing to download yet'); return; }
+  const blob = new Blob([`HOOK BANK — ${SECTION_NAMES[id].toUpperCase()}\n${'='.repeat(50)}\n\n${content}`], { type:'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `hookbank-section-${id}-${SECTION_NAMES[id].replace(/\s+/g,'-').toLowerCase()}.txt`;
+  a.click();
+}
+
+function exportAll() {
+  if (!Object.keys(allOutputs).length) { showToast('Generate sections first'); return; }
+  const offer = document.getElementById('offer-input').value.trim();
+  let full = `HOOK BANK — COMPLETE EXPORT\n${'='.repeat(60)}\n\nOFFER:\n${offer}\n\nGenerated: ${new Date().toLocaleString()}\n\n${'='.repeat(60)}\n\n`;
+  Object.entries(allOutputs).sort((a,b)=>+a[0]-+b[0]).forEach(([id, content]) => {
+    full += `\n\n${'='.repeat(60)}\nSECTION ${id}: ${SECTION_NAMES[id].toUpperCase()}\n${'='.repeat(60)}\n\n${content}\n`;
+  });
+  const blob = new Blob([full], { type:'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `hookbank-complete-${Date.now()}.txt`;
+  a.click();
+  showToast('✓ Exported!');
+}
+</script>
+</body>
+</html>
