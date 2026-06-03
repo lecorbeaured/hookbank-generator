@@ -178,7 +178,60 @@
     .sidebar { position: static; height: auto; }
     .picks-grid { grid-template-columns: repeat(2, 1fr); }
   }
-</style>
+
+  /* SAVED HOOKS LIBRARY */
+  .library-item { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 10px; }
+  .library-item-text { flex: 1; font-size: 13px; line-height: 1.5; cursor: pointer; }
+  .library-item-text:hover { color: var(--accent2); }
+  .library-item-meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .library-item-actions { display: flex; gap: 4px; flex-shrink: 0; }
+  .lib-tag { display: inline-block; padding: 1px 7px; background: var(--bg3); border: 1px solid var(--border); border-radius: 100px; font-size: 10px; color: var(--muted); margin-right: 4px; }
+  .lib-tag.pinterest { border-color: #7B2D8B; color: #C77DDB; background: #1a0d1e; }
+  .lib-tag.tiktok { border-color: #1a5c5c; color: #4DC8C8; background: #0d1a1a; }
+  .lib-tag.email { border-color: #1a3a5c; color: #5B9BD5; background: #0d1520; }
+  .lib-tag.hook { border-color: #5c3a1a; color: #D5855B; background: #1a120d; }
+  .lib-tag.script { border-color: #2a5c1a; color: #7DD55B; background: #0f1a0d; }
+  .save-hook-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px; font-size: 11px; background: #0d1a12; border: 1px solid #14532d; color: #4ade80; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; margin-left: 4px; }
+  .save-hook-btn:hover { background: #0f2018; }
+  .lib-empty { text-align: center; padding: 2rem; color: var(--muted); font-size: 13px; }
+
+  /* OFFER HISTORY */
+  .history-item { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 6px; cursor: pointer; transition: border-color 0.15s; display: flex; align-items: center; gap: 10px; }
+  .history-item:hover { border-color: #555; }
+  .history-item-name { font-size: 13px; font-weight: 600; flex: 1; }
+  .history-item-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .history-item-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 2px 6px; border-radius: 4px; }
+  .history-item-del:hover { color: var(--accent); background: var(--bg3); }
+
+  /* PLATFORM OPTIMIZER */
+  .platform-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1rem; }
+  .platform-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; font-size: 12px; color: var(--muted); cursor: pointer; text-align: center; transition: all 0.15s; }
+  .platform-btn:hover { border-color: #555; color: var(--text); }
+  .platform-btn.active { border-color: var(--accent); color: var(--text); background: #1c1014; }
+  .platform-btn .pl-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+
+  /* BULK GENERATOR */
+  .bulk-input { width: 100%; min-height: 120px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 10px 12px; font-size: 13px; font-family: inherit; resize: vertical; line-height: 1.6; }
+  .bulk-input:focus { outline: none; border-color: var(--accent); }
+  .bulk-result-item { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; }
+  .bulk-result-product { font-size: 11px; color: var(--accent2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .bulk-result-text { font-size: 13px; line-height: 1.7; white-space: pre-wrap; }
+
+  /* TOOL TABS */
+  .tool-nav { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; overflow-x: auto; }
+  .tool-tab { padding: 9px 16px; font-size: 13px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.15s; }
+  .tool-tab:hover { color: var(--text); }
+  .tool-tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+  .tool-panel { display: none; }
+  .tool-panel.active { display: block; }
+
+  /* CSV EXPORT */
+  .cal-preview { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-top: 1rem; }
+  .cal-row { display: grid; grid-template-columns: 50px 1fr 1fr 1fr 1fr; gap: 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .cal-row:last-child { border-bottom: none; }
+  .cal-row.header { background: var(--bg3); font-weight: 600; color: var(--muted); font-size: 11px; text-transform: uppercase; }
+  .cal-cell { padding: 8px 10px; border-right: 1px solid var(--border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cal-cell:last-child { border-right: none; }</style>
 </head>
 <body>
 
@@ -225,8 +278,17 @@
       <div class="nav-item" id="nav-13" onclick="jumpToSection(13)"><div class="nav-num">13</div> Voiceover scripts</div>
     </div>
 
+    <div class="section-nav" style="border-top:1px solid var(--border);padding-top:1rem">
+      <div class="nav-label">Tools</div>
+      <div class="nav-item" id="nav-library" onclick="openTool('library')"><div class="nav-num">💾</div> Saved hooks</div>
+      <div class="nav-item" id="nav-history" onclick="openTool('history')"><div class="nav-num">📂</div> Offer history</div>
+      <div class="nav-item" id="nav-optimizer" onclick="openTool('optimizer')"><div class="nav-num">🎯</div> Platform optimizer</div>
+      <div class="nav-item" id="nav-bulk" onclick="openTool('bulk')"><div class="nav-num">⚡</div> Bulk pin generator</div>
+      <div class="nav-item" id="nav-calendar" onclick="openTool('calendar')"><div class="nav-num">📊</div> Calendar CSV export</div>
+    </div>
+
     <div class="sidebar-footer">
-      <button class="btn btn-secondary" style="width:100%;font-size:12px" onclick="exportAll()">⬇ Export all as .txt</button>
+      <button class="btn btn-secondary" style="width:100%;font-size:12px;margin-bottom:6px" onclick="exportAll()">⬇ Export all as .txt</button>
     </div>
   </aside>
 
@@ -299,6 +361,133 @@
       <div class="output-tabs" id="output-tabs"></div>
       <div id="output-sections"></div>
     </div>
+
+    <!-- SAVED HOOKS LIBRARY -->
+    <div id="page-library" class="page" style="display:none">
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div><div class="page-title">💾 Saved hooks</div><div class="page-sub">Your personal swipe file — saved across sessions</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-sm" onclick="clearLibrary()">🗑 Clear all</button>
+          <button class="btn-sm" onclick="exportLibrary()">⬇ Export</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+        <button class="btn-sm lib-filter active" data-tag="all" onclick="filterLibrary(this,'all')">All</button>
+        <button class="btn-sm lib-filter" data-tag="hook" onclick="filterLibrary(this,'hook')">Hooks</button>
+        <button class="btn-sm lib-filter" data-tag="pinterest" onclick="filterLibrary(this,'pinterest')">Pinterest</button>
+        <button class="btn-sm lib-filter" data-tag="tiktok" onclick="filterLibrary(this,'tiktok')">TikTok</button>
+        <button class="btn-sm lib-filter" data-tag="email" onclick="filterLibrary(this,'email')">Email</button>
+        <button class="btn-sm lib-filter" data-tag="script" onclick="filterLibrary(this,'script')">Scripts</button>
+      </div>
+      <div id="library-list"><div class="lib-empty">No saved hooks yet.<br>Click the 💾 Save button on any hook to add it here.</div></div>
+    </div>
+
+    <!-- OFFER HISTORY -->
+    <div id="page-history" class="page" style="display:none">
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between">
+        <div><div class="page-title">📂 Offer history</div><div class="page-sub">Switch between saved offers without re-typing</div></div>
+        <button class="btn-sm" onclick="saveCurrentOffer()">💾 Save current offer</button>
+      </div>
+      <div id="history-list"><div class="lib-empty">No saved offers yet.<br>Click "Save current offer" to save the offer in your setup box.</div></div>
+    </div>
+
+    <!-- PLATFORM OPTIMIZER -->
+    <div id="page-optimizer" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-title">🎯 Platform optimizer</div>
+        <div class="page-sub">Paste any hook and optimize it for a specific platform's algorithm and audience</div>
+      </div>
+      <div class="offer-card" style="margin-bottom:1rem">
+        <h2>Hook or content to optimize</h2>
+        <textarea class="offer-textarea" id="optimizer-input" placeholder="Paste any hook, title, description, or content here..." style="min-height:80px"></textarea>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em">Optimize for platform</div>
+      <div class="platform-grid">
+        <div class="platform-btn active" data-platform="pinterest" onclick="selectPlatform(this)"><span class="pl-icon">📌</span>Pinterest SEO</div>
+        <div class="platform-btn" data-platform="tiktok" onclick="selectPlatform(this)"><span class="pl-icon">🎵</span>TikTok algorithm</div>
+        <div class="platform-btn" data-platform="instagram" onclick="selectPlatform(this)"><span class="pl-icon">📸</span>Instagram Reels</div>
+        <div class="platform-btn" data-platform="youtube" onclick="selectPlatform(this)"><span class="pl-icon">▶️</span>YouTube Shorts</div>
+        <div class="platform-btn" data-platform="email" onclick="selectPlatform(this)"><span class="pl-icon">✉️</span>Email deliverability</div>
+        <div class="platform-btn" data-platform="twitter" onclick="selectPlatform(this)"><span class="pl-icon">🐦</span>X/Twitter</div>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="runOptimizer()">🎯 Optimize now</button>
+      </div>
+      <div id="optimizer-output" style="display:none;margin-top:1rem">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">Optimized output</div>
+        <div class="out-content" id="optimizer-result"></div>
+        <div class="action-row">
+          <button class="btn-sm" onclick="copyEl('optimizer-result')">📋 Copy</button>
+          <button class="save-hook-btn" onclick="saveToLibrary(document.getElementById('optimizer-result').textContent,'optimizer','hook')">💾 Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BULK PIN GENERATOR -->
+    <div id="page-bulk" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-title">⚡ Bulk pin description generator</div>
+        <div class="page-sub">Paste up to 20 product names — get a full Pinterest description for each in one run</div>
+      </div>
+      <div class="offer-card" style="margin-bottom:1rem">
+        <h2>Product list</h2>
+        <p>One product per line. Include brand and model for best results.</p>
+        <textarea class="bulk-input" id="bulk-input" placeholder="Breville Barista Express Espresso Machine&#10;Ninja AF101 Air Fryer 4 Qt&#10;KitchenAid Artisan 5-Qt Stand Mixer&#10;Wusthof Classic 8-inch Chef Knife&#10;Instant Pot Duo 7-in-1"></textarea>
+      </div>
+      <div class="field" style="margin-bottom:1rem">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">Output type</label>
+        <select id="bulk-type" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:7px 10px;font-size:13px;width:auto">
+          <option value="pin-desc">Pinterest description</option>
+          <option value="pin-title">Pinterest title</option>
+          <option value="pin-overlay">Pin overlay text</option>
+          <option value="tiktok-hook">TikTok hook</option>
+          <option value="email-subject">Email subject line</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="runBulk()">⚡ Generate all</button>
+      <div id="bulk-output" style="margin-top:1.25rem;display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em">Results</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-sm" onclick="copyEl('bulk-results')">📋 Copy all</button>
+            <button class="btn-sm" onclick="downloadBulk()">⬇ Download</button>
+          </div>
+        </div>
+        <div id="bulk-results"></div>
+      </div>
+    </div>
+
+    <!-- CALENDAR CSV EXPORT -->
+    <div id="page-calendar" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-title">📊 Calendar CSV export</div>
+        <div class="page-sub">Export your 30-day content plan as a CSV for Notion, Google Sheets, or any scheduler</div>
+      </div>
+      <div id="cal-no-data" style="text-align:center;padding:3rem;color:var(--muted);font-size:13px">
+        Generate Section 12 (30-day plan) first, then come back here to export it as a CSV.
+        <br><br>
+        <button class="btn btn-secondary" onclick="jumpToSection(0)">← Go to setup</button>
+      </div>
+      <div id="cal-ready" style="display:none">
+        <div style="display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="downloadCalendarCSV()">⬇ Download CSV</button>
+          <button class="btn btn-secondary" onclick="copyCalendarCSV()">📋 Copy CSV</button>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Preview (first 7 days)</div>
+        <div class="cal-preview">
+          <div class="cal-row header">
+            <div class="cal-cell">Day</div>
+            <div class="cal-cell">TikTok</div>
+            <div class="cal-cell">Pinterest</div>
+            <div class="cal-cell">Email</div>
+            <div class="cal-cell">Blog</div>
+          </div>
+          <div id="cal-preview-rows"></div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px">Full 30-day CSV downloads with all columns. Import directly into Google Sheets or Notion.</div>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -732,6 +921,7 @@ CRITICAL FORMATTING RULE: Use plain text only. No markdown. No # headers, no ## 
 
   document.getElementById('run-btn').disabled = false;
   document.getElementById('run-btn').textContent = '⚡ Regenerate';
+  addSaveButtons();
   showToast('✓ Hook Bank complete!');
 }
 
@@ -742,16 +932,17 @@ function setNavState(id, state) {
 }
 
 function showResults() {
-  document.getElementById('page-0').style.display = 'none';
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
   document.getElementById('page-results').style.display = 'block';
-  // Only build tabs once — never rebuild or content gets wiped
   const tabsEl = document.getElementById('output-tabs');
   if (!tabsEl.hasChildNodes()) buildTabsIfNeeded();
 }
 
 function showSetup() {
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
   document.getElementById('page-0').style.display = 'block';
-  document.getElementById('page-results').style.display = 'none';
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('nav-0').classList.add('active');
 }
 
 function buildTabsIfNeeded() {
@@ -869,6 +1060,357 @@ function exportAll() {
   a.download = `hookbank-complete-${Date.now()}.txt`;
   a.click();
   showToast('✓ Exported!');
+}
+
+// ─── TOOL NAVIGATION ────────────────────────────────────────────────
+
+function openTool(tool) {
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+tool).style.display = 'block';
+  document.getElementById('nav-'+tool).classList.add('active');
+  if (tool === 'library') renderLibrary();
+  if (tool === 'history') renderHistory();
+  if (tool === 'calendar') renderCalendarPreview();
+}
+
+function copyEl(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const text = el.textContent || el.innerText;
+  navigator.clipboard.writeText(text).then(() => showToast('✓ Copied!')).catch(() => { prompt('Copy:', text); });
+}
+
+// ─── 1. SAVED HOOKS LIBRARY ─────────────────────────────────────────
+
+function loadLibrary() {
+  try { return JSON.parse(localStorage.getItem('hookbank_library') || '[]'); } catch(e) { return []; }
+}
+
+function saveLibraryData(data) {
+  try { localStorage.setItem('hookbank_library', JSON.stringify(data)); } catch(e) {}
+}
+
+function saveToLibrary(text, source, tag) {
+  if (!text || text.length < 5) { showToast('Nothing to save'); return; }
+  const lib = loadLibrary();
+  lib.unshift({ id: Date.now(), text: text.trim(), source, tag, date: new Date().toLocaleDateString() });
+  saveLibraryData(lib);
+  showToast('💾 Saved to library!');
+  if (document.getElementById('page-library').style.display !== 'none') renderLibrary();
+}
+
+let libFilter = 'all';
+
+function filterLibrary(btn, tag) {
+  document.querySelectorAll('.lib-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  libFilter = tag;
+  renderLibrary();
+}
+
+function renderLibrary() {
+  const lib = loadLibrary();
+  const el = document.getElementById('library-list');
+  const filtered = libFilter === 'all' ? lib : lib.filter(i => i.tag === libFilter);
+  if (!filtered.length) {
+    el.innerHTML = '<div class="lib-empty">No saved hooks yet.<br>Click 💾 Save on any output to add it here.</div>';
+    return;
+  }
+  el.innerHTML = filtered.map(item => `
+    <div class="library-item" id="libitem-${item.id}">
+      <div style="flex:1">
+        <div class="library-item-text" onclick="navigator.clipboard.writeText('${item.text.replace(/'/g,"\\'")}').then(()=>showToast('✓ Copied!'))">${item.text.length > 200 ? item.text.slice(0,200)+'...' : item.text}</div>
+        <div class="library-item-meta"><span class="lib-tag ${item.tag}">${item.tag}</span> ${item.source} &bull; ${item.date}</div>
+      </div>
+      <div class="library-item-actions">
+        <button class="btn-sm" onclick="navigator.clipboard.writeText(loadLibrary().find(i=>i.id===${item.id})?.text||'').then(()=>showToast('✓ Copied!'))">📋</button>
+        <button class="btn-sm" onclick="deleteLibraryItem(${item.id})">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function deleteLibraryItem(id) {
+  const lib = loadLibrary().filter(i => i.id !== id);
+  saveLibraryData(lib);
+  renderLibrary();
+}
+
+function clearLibrary() {
+  if (!confirm('Clear all saved hooks?')) return;
+  saveLibraryData([]);
+  renderLibrary();
+}
+
+function exportLibrary() {
+  const lib = loadLibrary();
+  if (!lib.length) { showToast('Nothing to export'); return; }
+  const text = lib.map(i => `[${i.tag.toUpperCase()}] ${i.source} — ${i.date}\n${i.text}`).join('\n\n---\n\n');
+  const blob = new Blob([text], { type:'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `hookbank-saved-${Date.now()}.txt`;
+  a.click();
+}
+
+// Add save buttons to action rows
+function addSaveButtons() {
+  const toGen = [...selectedSections].map(Number).filter(n => SECTION_PROMPTS[n]).sort((a,b)=>a-b);
+  toGen.forEach(id => {
+    const row = document.querySelector(`#sec-${id} .action-row`);
+    if (row && !row.querySelector('.save-hook-btn')) {
+      const btn = document.createElement('button');
+      btn.className = 'save-hook-btn';
+      btn.innerHTML = '💾 Save';
+      btn.onclick = () => {
+        const content = allOutputs[id] || '';
+        const tag = [4,8].includes(id) ? 'pinterest' : [3,13].includes(id) ? 'tiktok' : [6].includes(id) ? 'email' : 'hook';
+        saveToLibrary(content, SECTION_NAMES[id], tag);
+      };
+      row.appendChild(btn);
+    }
+  });
+}
+
+// ─── 2. OFFER HISTORY ───────────────────────────────────────────────
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem('hookbank_history') || '[]'); } catch(e) { return []; }
+}
+
+function saveHistoryData(data) {
+  try { localStorage.setItem('hookbank_history', JSON.stringify(data)); } catch(e) {}
+}
+
+function saveCurrentOffer() {
+  const offer = document.getElementById('offer-input').value.trim();
+  if (!offer) { showToast('⚠ No offer in setup box'); return; }
+  const name = offer.slice(0, 60).split(' ').slice(0, 6).join(' ') + (offer.length > 60 ? '...' : '');
+  const hist = loadHistory();
+  hist.unshift({ id: Date.now(), name, offer, date: new Date().toLocaleDateString() });
+  saveHistoryData(hist.slice(0, 20)); // keep last 20
+  showToast('💾 Offer saved!');
+  renderHistory();
+}
+
+function renderHistory() {
+  const hist = loadHistory();
+  const el = document.getElementById('history-list');
+  if (!hist.length) {
+    el.innerHTML = '<div class="lib-empty">No saved offers yet.<br>Click "Save current offer" above.</div>';
+    return;
+  }
+  el.innerHTML = hist.map(item => `
+    <div class="history-item">
+      <div style="flex:1" onclick="loadOffer(${item.id})">
+        <div class="history-item-name">${item.name}</div>
+        <div class="history-item-meta">${item.date}</div>
+      </div>
+      <button class="history-item-del" onclick="deleteHistory(${item.id})">✕</button>
+    </div>`).join('');
+}
+
+function loadOffer(id) {
+  const hist = loadHistory();
+  const item = hist.find(i => i.id === id);
+  if (!item) return;
+  document.getElementById('offer-input').value = item.offer;
+  showSetup();
+  showToast('✓ Offer loaded — ready to generate');
+}
+
+function deleteHistory(id) {
+  saveHistoryData(loadHistory().filter(i => i.id !== id));
+  renderHistory();
+}
+
+// ─── 5. PLATFORM OPTIMIZER ──────────────────────────────────────────
+
+let activePlatform = 'pinterest';
+
+const PLATFORM_PROMPTS = {
+  pinterest: `You are a Pinterest SEO expert. Optimize the following content specifically for Pinterest search and the Pinterest algorithm. Apply these rules: include 2-3 high-volume Pinterest keywords naturally, add seasonal/trend relevance if applicable, make the first sentence keyword-rich for SEO, include a soft call to action, keep it under 500 characters for description or 100 characters for title. Output the optimized version only, plain text.`,
+  tiktok: `You are a TikTok content strategist. Optimize the following content for maximum TikTok engagement and algorithmic reach. Apply these rules: front-load the hook in the first 3 words, use conversational Gen-Z adjacent language, create a curiosity gap or pattern interrupt, add urgency or FOMO where natural, keep energy high throughout. Output the optimized version only, plain text.`,
+  instagram: `You are an Instagram Reels expert. Optimize the following content for Instagram Reels engagement. Apply these rules: aspirational and visual language, strong emotional hook, lifestyle-focused framing, clear transformation implied, ends with engagement prompt. Output the optimized version only, plain text.`,
+  youtube: `You are a YouTube Shorts strategist. Optimize the following content for YouTube Shorts retention and CTR. Apply these rules: bold claim or question that creates a loop, promise of value delivery in under 60 seconds, keyword-rich for YouTube search, creates reason to watch to the end. Output the optimized version only, plain text.`,
+  email: `You are an email deliverability and open-rate expert. Optimize the following for maximum email open rates and deliverability. Apply these rules: avoid spam trigger words (free, guaranteed, click here, !!!), keep subject under 50 characters, use curiosity gap or personal framing, lowercase feels more personal, add a preheader suggestion. Output the optimized subject line and a preheader suggestion, plain text.`,
+  twitter: `You are a viral X/Twitter strategist. Optimize the following for maximum engagement on X/Twitter. Apply these rules: under 280 characters, strong opinion or contrarian angle, creates replies and quote-tweets, no hashtags unless truly necessary, punchy and direct. Output the optimized tweet only, plain text.`
+};
+
+function selectPlatform(btn) {
+  document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activePlatform = btn.dataset.platform;
+}
+
+async function runOptimizer() {
+  const input = document.getElementById('optimizer-input').value.trim();
+  if (!input) { showToast('⚠ Paste content to optimize'); return; }
+  const key = document.getElementById('api-key').value.trim();
+  if (!key) { showToast('⚠ Add your OpenRouter API key'); return; }
+
+  const out = document.getElementById('optimizer-result');
+  const wrap = document.getElementById('optimizer-output');
+  wrap.style.display = 'block';
+  out.className = 'out-content loading';
+  out.textContent = 'Optimizing for ' + activePlatform + '...';
+
+  try {
+    const result = await callLLM(PLATFORM_PROMPTS[activePlatform], input);
+    out.className = 'out-content';
+    out.textContent = result;
+  } catch(e) {
+    out.className = 'out-content';
+    out.textContent = 'Error: ' + e.message;
+  }
+}
+
+// ─── 6. BULK PIN GENERATOR ──────────────────────────────────────────
+
+const BULK_TYPE_PROMPTS = {
+  'pin-desc':      'Write a Pinterest description for this product. 2-3 sentences, SEO-optimized with keywords, ends with a call to action. Plain text only.',
+  'pin-title':     'Write a Pinterest title for this product. Under 100 characters, keyword-rich, curiosity-driven. Plain text only.',
+  'pin-overlay':   'Write Pinterest image overlay text for this product. Maximum 8 bold words that stop the scroll. Plain text only.',
+  'tiktok-hook':   'Write a TikTok opening hook for this product. 1-2 sentences, under 3 seconds spoken, creates instant curiosity. Plain text only.',
+  'email-subject': 'Write 3 email subject lines for this product. Mix curiosity and urgency styles. Number each. Plain text only.'
+};
+
+async function runBulk() {
+  const input = document.getElementById('bulk-input').value.trim();
+  if (!input) { showToast('⚠ Add product names first'); return; }
+  const key = document.getElementById('api-key').value.trim();
+  if (!key) { showToast('⚠ Add your OpenRouter API key'); return; }
+
+  const products = input.split('\n').map(p => p.trim()).filter(Boolean).slice(0, 20);
+  const type = document.getElementById('bulk-type').value;
+  const typePrompt = BULK_TYPE_PROMPTS[type];
+  const offer = document.getElementById('offer-input').value.trim();
+  const context = offer ? `Context — this is for: ${offer.slice(0,200)}` : '';
+
+  const resultsEl = document.getElementById('bulk-results');
+  const wrapEl = document.getElementById('bulk-output');
+  wrapEl.style.display = 'block';
+  resultsEl.innerHTML = products.map(p => `
+    <div class="bulk-result-item" id="bulk-${p.replace(/\s+/g,'_').slice(0,20)}">
+      <div class="bulk-result-product">${p}</div>
+      <div class="bulk-result-text" style="color:var(--muted);font-style:italic">Generating...</div>
+    </div>`).join('');
+
+  for (const product of products) {
+    const elId = 'bulk-'+product.replace(/\s+/g,'_').slice(0,20);
+    const textEl = document.querySelector(`#${elId} .bulk-result-text`);
+    try {
+      const result = await callLLM(
+        `You are a world-class copywriter. ${context}`,
+        `${typePrompt}\n\nPRODUCT: ${product}`
+      );
+      if (textEl) { textEl.style.color = ''; textEl.style.fontStyle = ''; textEl.textContent = result; }
+    } catch(e) {
+      if (textEl) { textEl.textContent = 'Error: ' + e.message; }
+    }
+  }
+  showToast(`✓ ${products.length} products done`);
+}
+
+function downloadBulk() {
+  const items = document.querySelectorAll('.bulk-result-item');
+  if (!items.length) return;
+  let text = 'BULK PIN GENERATOR EXPORT\n' + '='.repeat(40) + '\n\n';
+  items.forEach(item => {
+    const product = item.querySelector('.bulk-result-product').textContent;
+    const content = item.querySelector('.bulk-result-text').textContent;
+    text += `PRODUCT: ${product}\n${content}\n\n---\n\n`;
+  });
+  const blob = new Blob([text], { type:'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `bulk-pins-${Date.now()}.txt`;
+  a.click();
+}
+
+// ─── 8. CALENDAR CSV EXPORT ─────────────────────────────────────────
+
+function parseCalendarFromText(text) {
+  const days = [];
+  const dayRegex = /day\s*(\d+)[:\-\s]*/gi;
+  const lines = text.split('\n');
+  let currentDay = null;
+  let currentData = { tiktok:'', pinterest:'', email:'', blog:'' };
+
+  for (const line of lines) {
+    const dayMatch = line.match(/^day\s*(\d+)/i);
+    if (dayMatch) {
+      if (currentDay) days.push({ day: currentDay, ...currentData });
+      currentDay = parseInt(dayMatch[1]);
+      currentData = { tiktok:'', pinterest:'', email:'', blog:'' };
+      continue;
+    }
+    if (!currentDay) continue;
+    const l = line.toLowerCase();
+    if (l.includes('tiktok')) currentData.tiktok = line.replace(/.*tiktok[:\-\s]*/i,'').trim();
+    else if (l.includes('pinterest')) currentData.pinterest = line.replace(/.*pinterest[:\-\s]*/i,'').trim();
+    else if (l.includes('email')) currentData.email = line.replace(/.*email[:\-\s]*/i,'').trim();
+    else if (l.includes('blog')) currentData.blog = line.replace(/.*blog[:\-\s]*/i,'').trim();
+  }
+  if (currentDay) days.push({ day: currentDay, ...currentData });
+  return days;
+}
+
+function renderCalendarPreview() {
+  const calData = allOutputs[12];
+  if (!calData) {
+    document.getElementById('cal-no-data').style.display = 'block';
+    document.getElementById('cal-ready').style.display = 'none';
+    return;
+  }
+  document.getElementById('cal-no-data').style.display = 'none';
+  document.getElementById('cal-ready').style.display = 'block';
+
+  const days = parseCalendarFromText(calData);
+  const preview = days.slice(0, 7);
+  const rowsEl = document.getElementById('cal-preview-rows');
+  if (!preview.length) {
+    rowsEl.innerHTML = '<div style="padding:1rem;color:var(--muted);font-size:12px">Could not parse calendar. Download CSV to see raw data.</div>';
+    return;
+  }
+  rowsEl.innerHTML = preview.map(d => `
+    <div class="cal-row">
+      <div class="cal-cell" style="font-weight:600;color:var(--accent2)">Day ${d.day}</div>
+      <div class="cal-cell">${d.tiktok || '-'}</div>
+      <div class="cal-cell">${d.pinterest || '-'}</div>
+      <div class="cal-cell">${d.email || '-'}</div>
+      <div class="cal-cell">${d.blog || '-'}</div>
+    </div>`).join('');
+}
+
+function buildCalendarCSV() {
+  const calData = allOutputs[12] || '';
+  const days = parseCalendarFromText(calData);
+  if (!days.length) return calData; // fallback to raw text
+  const header = 'Day,TikTok,Pinterest,Email,Blog';
+  const rows = days.map(d => [
+    d.day,
+    `"${(d.tiktok||'').replace(/"/g,'""')}"`,
+    `"${(d.pinterest||'').replace(/"/g,'""')}"`,
+    `"${(d.email||'').replace(/"/g,'""')}"`,
+    `"${(d.blog||'').replace(/"/g,'""')}"`
+  ].join(','));
+  return [header, ...rows].join('\n');
+}
+
+function downloadCalendarCSV() {
+  const csv = buildCalendarCSV();
+  const blob = new Blob([csv], { type:'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `content-calendar-${Date.now()}.csv`;
+  a.click();
+  showToast('✓ CSV downloaded');
+}
+
+function copyCalendarCSV() {
+  const csv = buildCalendarCSV();
+  navigator.clipboard.writeText(csv).then(() => showToast('✓ CSV copied')).catch(() => { prompt('Copy CSV:', csv); });
 }
 
 // ─── REPURPOSE ENGINE ───────────────────────────────────────────────
