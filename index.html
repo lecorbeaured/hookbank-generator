@@ -1430,6 +1430,8 @@ const TRANSFORMS = [
   { id:'twitter-hook',  icon:'🐦', label:'X/Twitter hook',        desc:'Thread opener or single tweet' },
   { id:'instagram-cap', icon:'💬', label:'Instagram caption',     desc:'Caption with hashtags' },
   { id:'sms',           icon:'📱', label:'SMS/text message',      desc:'Under 160 chars with link' },
+  { id:'fb-post',       icon:'👥', label:'Facebook post',         desc:'Engaging organic post' },
+  { id:'fb-ad',         icon:'💰', label:'Facebook ad copy',      desc:'Hook + body + CTA ad' },
 ];
 
 const TRANSFORM_PROMPTS = {
@@ -1447,6 +1449,8 @@ const TRANSFORM_PROMPTS = {
   'twitter-hook':  'Transform the following into a punchy X/Twitter thread opener or standalone tweet. Under 280 characters. Creates curiosity, controversy, or value. Output the tweet only.',
   'instagram-cap': 'Transform the following into an Instagram caption. 3-4 sentences, conversational, ends with a question or CTA. Add 10 relevant hashtags on a new line. Plain text only.',
   'sms':           'Transform the following into an SMS marketing message. Under 160 characters. Include urgency, value, and a short link placeholder [LINK]. Output the SMS text only.',
+  'fb-post':       'Transform the following into a Facebook organic post. 3-5 sentences, conversational and relatable, starts with a strong hook line, ends with a question to drive comments. No hashtags. Plain text only.',
+  'fb-ad':         'Transform the following into Facebook ad copy. Format: HEADLINE: [5-8 words, bold claim] BODY: [3-4 sentences, problem-agitate-solve, conversational] CTA: [one clear action button text]. Output plain text only, no markdown.',
 };
 
 let repurposeSource = '';
