@@ -172,6 +172,24 @@
   .repurpose-btn:hover { background: #2a1414; border-color: var(--accent); color: var(--text); }
   @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 0.9; } }
 
+  /* BOOK UPLOAD */
+  .book-upload-zone { border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 1.25rem; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg3); }
+  .book-upload-zone:hover { border-color: var(--accent); background: #1c1014; }
+  .book-upload-zone.dragover { border-color: var(--accent); background: #1c1014; }
+  .book-upload-zone.loaded { border-color: var(--green); background: #0d2318; }
+  .book-upload-icon { font-size: 28px; display: block; margin-bottom: 8px; }
+  .book-upload-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .book-upload-sub { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .book-status { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 12px; margin-top: 8px; }
+  .book-status.loaded { background: #0d2318; border: 1px solid #14532d; color: #4ade80; }
+  .book-status.empty { background: var(--bg3); border: 1px solid var(--border); color: var(--muted); }
+  .book-indicator { display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: var(--radius-sm); font-size: 11px; cursor: pointer; margin-top: 6px; width: 100%; }
+  .book-indicator.loaded { background: #0d2318; border: 1px solid #14532d; color: #4ade80; }
+  .book-indicator.empty { background: var(--bg3); border: 1px solid var(--border); color: var(--muted); }
+  .book-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .book-indicator.loaded .book-dot { background: var(--green); }
+  .book-indicator.empty .book-dot { background: var(--muted); }
+
   /* RESPONSIVE */
   @media (max-width: 700px) {
     .app { grid-template-columns: 1fr; }
@@ -285,10 +303,15 @@
       <div class="nav-item" id="nav-optimizer" onclick="openTool('optimizer')"><div class="nav-num">🎯</div> Platform optimizer</div>
       <div class="nav-item" id="nav-bulk" onclick="openTool('bulk')"><div class="nav-num">⚡</div> Bulk pin generator</div>
       <div class="nav-item" id="nav-calendar" onclick="openTool('calendar')"><div class="nav-num">📊</div> Calendar CSV export</div>
+      <div class="nav-item" id="nav-bookupload" onclick="openTool('bookupload')"><div class="nav-num">📖</div> Book / doc upload</div>
     </div>
 
     <div class="sidebar-footer">
-      <button class="btn btn-secondary" style="width:100%;font-size:12px;margin-bottom:6px" onclick="exportAll()">⬇ Export all as .txt</button>
+      <div class="book-indicator empty" id="book-indicator-sidebar" onclick="openTool('bookupload')" style="cursor:pointer">
+        <div class="book-dot"></div>
+        <span id="book-indicator-text">No book loaded</span>
+      </div>
+      <button class="btn btn-secondary" style="width:100%;font-size:12px;margin-top:6px" onclick="exportAll()">⬇ Export all as .txt</button>
     </div>
   </aside>
 
@@ -485,6 +508,70 @@
           <div id="cal-preview-rows"></div>
         </div>
         <div style="font-size:12px;color:var(--muted);margin-top:8px">Full 30-day CSV downloads with all columns. Import directly into Google Sheets or Notion.</div>
+      </div>
+    </div>
+
+    <!-- BOOK / DOC UPLOAD -->
+    <div id="page-bookupload" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-title">📖 Book / doc upload</div>
+        <div class="page-sub">Ground every AI output in your actual content — no more hallucinated facts</div>
+      </div>
+
+      <!-- HOW IT WORKS -->
+      <div class="card" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.25rem">
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px">How it works</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+            <div>
+              <div style="font-size:13px;font-weight:500">Convert your PDF to Markdown first</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px">Upload your book PDF to Claude or ChatGPT and ask: "Convert this entire document to markdown. Preserve all headings, chapter names, and content exactly. Output the full markdown only." Save the result as a <code style="background:var(--bg3);padding:1px 5px;border-radius:3px;font-size:11px">.md</code> or <code style="background:var(--bg3);padding:1px 5px;border-radius:3px;font-size:11px">.txt</code> file.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+            <div>
+              <div style="font-size:13px;font-weight:500">Upload the .md or .txt file here</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px">Drop it in the zone below. The tool reads it instantly — nothing is sent to any server. It stays in your browser session only.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+            <div>
+              <div style="font-size:13px;font-weight:500">Every AI output is now grounded in your content</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px">Hook bank generation, repurpose transforms, platform optimizer — all will reference your actual chapter titles, laws, concepts, and language. No invented facts.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--bg3);color:var(--muted);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">⚠</div>
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--muted)">Re-upload each session</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px">The file lives in memory only — it clears when you close or refresh the tab. Keep the .md file on your desktop for quick re-upload.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPLOAD ZONE -->
+      <div class="book-upload-zone" id="book-upload-zone" onclick="document.getElementById('book-file-input').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <span class="book-upload-icon" id="book-upload-icon">📄</span>
+        <div class="book-upload-title" id="book-upload-title">Drop your .md or .txt file here</div>
+        <div class="book-upload-sub" id="book-upload-sub">or click to browse — accepts .md, .txt files only<br>Convert PDF to MD first using Claude or ChatGPT</div>
+        <input type="file" id="book-file-input" accept=".md,.txt" style="display:none" onchange="handleFileSelect(event)">
+      </div>
+
+      <div class="book-status empty" id="book-status">
+        <span id="book-status-icon">○</span>
+        <span id="book-status-text">No file loaded — outputs will generate without book context</span>
+      </div>
+
+      <div id="book-preview-wrap" style="display:none;margin-top:1.25rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em">Content preview (first 500 chars)</div>
+          <button class="btn-sm" onclick="clearBookContent()">🗑 Remove</button>
+        </div>
+        <div id="book-preview" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:12px;color:var(--muted);white-space:pre-wrap;line-height:1.6;max-height:150px;overflow-y:auto"></div>
       </div>
     </div>
 
@@ -750,6 +837,7 @@ RULES:
 let allOutputs = {};
 let selectedSections = new Set(['1','2','3','4','5','6','7','8','9','10','11','12','13']);
 let currentTabId = null;
+let bookContent = ''; // grounding context from uploaded file
 
 function saveKey(val) {
   try { localStorage.setItem('hookbank_apikey', val); } catch(e) {}
@@ -867,10 +955,12 @@ async function runAll() {
   allOutputs = {};
   showResults();
 
+  const bookContext = bookContent ? `\n\nSOURCE DOCUMENT — GROUND ALL OUTPUT IN THIS CONTENT ONLY:\nDo NOT invent chapter names, laws, principles, concepts, or quotes not present in this document. Use only what is written below.\n\n${bookContent.slice(0, 12000)}\n\nEND OF SOURCE DOCUMENT` : '';
+
   const systemPrompt = `You are a world-class marketing expert — a fusion of Brendan Kane (viral content), David Ogilvy (advertising mastery), Gary Halbert (direct response), and Eugene Schwartz (copywriting psychology).
 
 THE OFFER:
-${offer}
+${offer}${bookContext}
 
 Before writing, mentally analyze:
 • Target audience (who exactly, demographics, psychographics)
@@ -1068,10 +1158,100 @@ function openTool(tool) {
   document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-'+tool).style.display = 'block';
-  document.getElementById('nav-'+tool).classList.add('active');
+  const navEl = document.getElementById('nav-'+tool);
+  if (navEl) navEl.classList.add('active');
   if (tool === 'library') renderLibrary();
   if (tool === 'history') renderHistory();
   if (tool === 'calendar') renderCalendarPreview();
+}
+
+// ─── BOOK UPLOAD ─────────────────────────────────────────────────────
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('book-upload-zone').classList.add('dragover');
+}
+
+function handleDragLeave(e) {
+  document.getElementById('book-upload-zone').classList.remove('dragover');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('book-upload-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) processBookFile(file);
+}
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) processBookFile(file);
+}
+
+function processBookFile(file) {
+  const allowed = ['.md', '.txt'];
+  const ext = '.' + file.name.split('.').pop().toLowerCase();
+  if (!allowed.includes(ext)) {
+    showToast('⚠ Only .md and .txt files supported');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    bookContent = e.target.result;
+    const wordCount = bookContent.split(/\s+/).filter(Boolean).length;
+    const charCount = bookContent.length;
+
+    // Update upload zone
+    const zone = document.getElementById('book-upload-zone');
+    zone.classList.add('loaded');
+    document.getElementById('book-upload-icon').textContent = '✅';
+    document.getElementById('book-upload-title').textContent = file.name + ' loaded';
+    document.getElementById('book-upload-sub').textContent = `${wordCount.toLocaleString()} words · ${(charCount/1000).toFixed(1)}k characters · Click to replace`;
+
+    // Update status
+    const status = document.getElementById('book-status');
+    status.className = 'book-status loaded';
+    document.getElementById('book-status-icon').textContent = '●';
+    document.getElementById('book-status-text').textContent = `Book loaded — all AI outputs now grounded in "${file.name}"`;
+
+    // Show preview
+    document.getElementById('book-preview-wrap').style.display = 'block';
+    document.getElementById('book-preview').textContent = bookContent.slice(0, 500) + (bookContent.length > 500 ? '...' : '');
+
+    // Update sidebar indicator
+    updateBookIndicator(file.name, wordCount);
+    showToast('✓ Book loaded — ' + wordCount.toLocaleString() + ' words');
+  };
+  reader.readAsText(file);
+}
+
+function clearBookContent() {
+  bookContent = '';
+  document.getElementById('book-upload-zone').classList.remove('loaded');
+  document.getElementById('book-upload-icon').textContent = '📄';
+  document.getElementById('book-upload-title').textContent = 'Drop your .md or .txt file here';
+  document.getElementById('book-upload-sub').textContent = 'or click to browse — accepts .md, .txt files only\nConvert PDF to MD first using Claude or ChatGPT';
+  document.getElementById('book-status').className = 'book-status empty';
+  document.getElementById('book-status-icon').textContent = '○';
+  document.getElementById('book-status-text').textContent = 'No file loaded — outputs will generate without book context';
+  document.getElementById('book-preview-wrap').style.display = 'none';
+  document.getElementById('book-file-input').value = '';
+  updateBookIndicator(null, 0);
+  showToast('Book content cleared');
+}
+
+function updateBookIndicator(filename, wordCount) {
+  const ind = document.getElementById('book-indicator-sidebar');
+  const txt = document.getElementById('book-indicator-text');
+  if (!ind || !txt) return;
+  if (filename) {
+    ind.className = 'book-indicator loaded';
+    txt.textContent = '📖 ' + filename.replace(/\.(md|txt)$/i,'') + ' (' + wordCount.toLocaleString() + ' words)';
+  } else {
+    ind.className = 'book-indicator empty';
+    txt.textContent = 'No book loaded';
+  }
 }
 
 function copyEl(id) {
@@ -1506,7 +1686,8 @@ async function runTransform(transformId, btn) {
   const labelEl = document.getElementById('rp-output-label');
   if (labelEl) labelEl.style.display = 'block';
 
-  const systemPrompt = `You are a world-class copywriter and content strategist. Transform the provided content as instructed. Be specific, punchy, and commercial. Plain text output only — no markdown, no headers, no preamble.`;
+  const bookCtx = bookContent ? `\n\nSOURCE DOCUMENT CONTEXT — use only facts, names, and concepts from this document. Do not invent anything not present here:\n${bookContent.slice(0, 8000)}` : '';
+  const systemPrompt = `You are a world-class copywriter and content strategist. Transform the provided content as instructed. Be specific, punchy, and commercial. Plain text output only — no markdown, no headers, no preamble.${bookCtx}`;
   const userMsg = `${TRANSFORM_PROMPTS[transformId]}\n\nCONTENT TO TRANSFORM:\n${sourceText}`;
 
   try {
