@@ -314,6 +314,7 @@
       <div class="nav-item" id="nav-11" onclick="jumpToSection(11)"><div class="nav-num">11</div> Virality scores</div>
       <div class="nav-item" id="nav-12" onclick="jumpToSection(12)"><div class="nav-num">12</div> 30-day plan</div>
       <div class="nav-item" id="nav-13" onclick="jumpToSection(13)"><div class="nav-num">13</div> Voiceover scripts</div>
+      <div class="nav-item" id="nav-14" onclick="jumpToSection(14)"><div class="nav-num">14</div> TikTok · FB · IG</div>
     </div>
 
     <div class="section-nav" style="border-top:1px solid var(--border);padding-top:1rem">
@@ -367,6 +368,7 @@
           <div class="pick-btn selected" data-id="11" onclick="togglePick(this)"><span class="pick-icon">🔥</span>Virality</div>
           <div class="pick-btn selected" data-id="12" onclick="togglePick(this)"><span class="pick-icon">📅</span>30-day plan</div>
           <div class="pick-btn selected" data-id="13" onclick="togglePick(this)"><span class="pick-icon">🎙️</span>Voiceovers</div>
+          <div class="pick-btn selected" data-id="14" onclick="togglePick(this)"><span class="pick-icon">🔁</span>TikTok · FB · IG</div>
         </div>
       </div>
 
@@ -624,7 +626,7 @@ const SECTION_NAMES = {
   4:'Pinterest hooks', 5:'Blog hooks', 6:'Email hooks',
   7:'Lead magnets', 8:'Social content (100)',
   9:'Sales page', 10:'Monetization', 11:'Virality scores', 12:'30-day plan',
-  13:'Voiceover scripts'
+  13:'Voiceover scripts', 14:'TikTok · Facebook · Instagram'
 };
 
 const SECTION_PROMPTS = {
@@ -870,10 +872,65 @@ RULES:
 - Vary angles across all 30: educational, story-based, shocking, aspirational, fear, curiosity
 - All scripts specific to the offer — no generic content
 - Plain text only, no markdown`
+,
+
+  14: `SECTION 14 — TIKTOK PINNED COMMENT + FACEBOOK POST + INSTAGRAM POST
+
+You are writing in the style of Lauren Magers — conversational, curiosity-driven, personal, and magnetic. Every piece must make the reader stop scrolling, feel something, and want to know more while the video plays on loop.
+
+RULES FOR ALL THREE FORMATS:
+- Open with a line so intriguing the reader cannot look away
+- Create an open loop the video resolves — make watching feel necessary
+- No corporate speak, no bullet points, no numbered lists
+- Write like a real person talking to one friend, not broadcasting to a crowd
+- Every word must earn its place — no filler, no throat-clearing
+- Plain text only, no markdown, no hashtag lists inside body copy
+
+---
+
+TIKTOK PINNED COMMENT (3 versions)
+
+This is the comment pinned under the video while it loops. It should:
+- Open with a POV, confession, or shocking statement that reframes what they just watched
+- Create desperate curiosity so they rewatch the video looking for what they missed
+- Feel like a secret being whispered, not an ad being read
+- End with a soft pull — a question, a half-revealed answer, or an unfinished thought
+- Maximum 3 sentences per version. Punchy. No emojis unless one strategic one.
+
+Write 3 versions labeled VERSION 1, VERSION 2, VERSION 3.
+
+---
+
+FACEBOOK POST (3 versions)
+
+Long-form personal storytelling post. It should:
+- Open with a single line that stops the thumb cold — a confession, a bold claim, or a story fragment
+- Build tension through a personal story arc: before state, the moment everything shifted, the after
+- Feel like the writer is bravely sharing something they almost kept private
+- Weave in what the offer does without making it feel like an ad
+- End with a question that pulls comments out of people who recognize themselves in the story
+- No hashtags. No bullet points. Pure flowing paragraphs.
+- Length: 150-220 words per version
+
+Write 3 versions labeled VERSION 1, VERSION 2, VERSION 3.
+
+---
+
+INSTAGRAM POST (3 versions)
+
+Punchy, visual, aspirational. It should:
+- Open with a 1-line hook that feels like a caption on a viral photo
+- Build in 3-5 short punchy lines that create escalating curiosity or desire
+- Make the reader feel like they are already missing out or already behind
+- End with a direct question or CTA that pulls engagement
+- Add 5-8 tightly relevant hashtags on a final line (no generic ones)
+- Length: 60-90 words per version
+
+Write 3 versions labeled VERSION 1, VERSION 2, VERSION 3.`
 };
 
 let allOutputs = {};
-let selectedSections = new Set(['1','2','3','4','5','6','7','8','9','10','11','12','13']);
+let selectedSections = new Set(['1','2','3','4','5','6','7','8','9','10','11','12','13','14']);
 let currentTabId = null;
 let bookContent = ''; // grounding context from uploaded file
 
@@ -1092,13 +1149,37 @@ function buildTabsIfNeeded() {
     const sec = document.createElement('div');
     sec.className = 'section-block' + (i === 0 ? ' active' : '');
     sec.id = 'sec-'+id;
-    sec.innerHTML = `
-      <div class="out-content loading" id="out-${id}">Generating ${SECTION_NAMES[id]}...</div>
-      <div class="action-row" id="actions-${id}" style="display:none">
-        <button class="btn-sm" onclick="copySection(${id})">📋 Copy</button>
-        <button class="btn-sm" onclick="downloadSection(${id})">⬇ Download</button>
-        <button class="repurpose-btn" onclick="openRepurpose(allOutputs[${id}] || '', '${SECTION_NAMES[id]}')">⚡ Repurpose</button>
-      </div>`;
+
+    if (id === 14) {
+      sec.innerHTML = `
+        <div class="tool-nav" id="s14-tabs" style="margin-bottom:1rem">
+          <div class="tool-tab active" onclick="switchS14Tab('tiktok',this)">📱 TikTok pinned comment</div>
+          <div class="tool-tab" onclick="switchS14Tab('facebook',this)">👥 Facebook post</div>
+          <div class="tool-tab" onclick="switchS14Tab('instagram',this)">📸 Instagram post</div>
+        </div>
+        <div id="s14-tiktok" class="tool-panel active">
+          <div class="out-content loading" id="out-14-tiktok">Generating TikTok · Facebook · Instagram...</div>
+        </div>
+        <div id="s14-facebook" class="tool-panel">
+          <div class="out-content" id="out-14-facebook" style="min-height:80px"></div>
+        </div>
+        <div id="s14-instagram" class="tool-panel">
+          <div class="out-content" id="out-14-instagram" style="min-height:80px"></div>
+        </div>
+        <div class="action-row" id="actions-14" style="display:none">
+          <button class="btn-sm" onclick="copySection14()">📋 Copy</button>
+          <button class="btn-sm" onclick="downloadSection(14)">⬇ Download</button>
+          <button class="repurpose-btn" onclick="openRepurpose(getS14Active(), 'TikTok · FB · IG')">⚡ Repurpose</button>
+        </div>`;
+    } else {
+      sec.innerHTML = `
+        <div class="out-content loading" id="out-${id}">Generating ${SECTION_NAMES[id]}...</div>
+        <div class="action-row" id="actions-${id}" style="display:none">
+          <button class="btn-sm" onclick="copySection(${id})">📋 Copy</button>
+          <button class="btn-sm" onclick="downloadSection(${id})">⬇ Download</button>
+          <button class="repurpose-btn" onclick="openRepurpose(allOutputs[${id}] || '', '${SECTION_NAMES[id]}')">⚡ Repurpose</button>
+        </div>`;
+    }
     sectionsEl.appendChild(sec);
     if (i === 0) currentTabId = id;
   });
@@ -1114,12 +1195,21 @@ function updateResultsHeader() {
 }
 
 function updateTabLoading(id, loading) {
+  if (id === 14) {
+    const el = document.getElementById('out-14-tiktok');
+    if (el && loading) { el.className = 'out-content loading'; el.textContent = 'Generating TikTok · Facebook · Instagram...'; }
+    return;
+  }
   const el = document.getElementById('out-'+id);
   if (!el) return;
   if (loading) { el.className = 'out-content loading'; el.textContent = `Generating ${SECTION_NAMES[id]}...`; }
 }
 
 function updateTabContent(id, content) {
+  if (id === 14) {
+    updateSection14(content);
+    return;
+  }
   const el = document.getElementById('out-'+id);
   if (!el) return;
   el.className = 'out-content';
@@ -1138,6 +1228,54 @@ function updateTabContent(id, content) {
       row.appendChild(btn);
     }
   }
+}
+
+function updateSection14(content) {
+  // Split the raw output into three panels by detecting the section headers
+  const tiktokMatch = content.match(/TIKTOK PINNED COMMENT[\s\S]*?(?=FACEBOOK POST|$)/i);
+  const fbMatch = content.match(/FACEBOOK POST[\s\S]*?(?=INSTAGRAM POST|$)/i);
+  const igMatch = content.match(/INSTAGRAM POST[\s\S]*/i);
+
+  const tiktokEl = document.getElementById('out-14-tiktok');
+  const fbEl = document.getElementById('out-14-facebook');
+  const igEl = document.getElementById('out-14-instagram');
+
+  if (tiktokEl) { tiktokEl.className = 'out-content'; tiktokEl.textContent = tiktokMatch ? tiktokMatch[0].trim() : content; }
+  if (fbEl) { fbEl.className = 'out-content'; fbEl.textContent = fbMatch ? fbMatch[0].trim() : ''; }
+  if (igEl) { igEl.className = 'out-content'; igEl.textContent = igMatch ? igMatch[0].trim() : ''; }
+
+  const row = document.getElementById('actions-14');
+  if (row) {
+    row.style.display = 'flex';
+    if (!row.querySelector('.save-hook-btn')) {
+      const btn = document.createElement('button');
+      btn.className = 'save-hook-btn';
+      btn.innerHTML = '💾 Save';
+      btn.onclick = () => saveToLibrary(content, 'TikTok · FB · IG', 'tiktok');
+      row.appendChild(btn);
+    }
+  }
+}
+
+function switchS14Tab(panel, el) {
+  document.querySelectorAll('#s14-tabs .tool-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  ['tiktok','facebook','instagram'].forEach(p => {
+    const pan = document.getElementById('s14-'+p);
+    if (pan) pan.classList.toggle('active', p === panel);
+    if (pan) pan.style.display = p === panel ? 'block' : 'none';
+  });
+}
+
+function getS14Active() {
+  const active = document.querySelector('#sec-14 .tool-panel.active .out-content');
+  return active ? active.textContent : allOutputs[14] || '';
+}
+
+function copySection14() {
+  const text = getS14Active();
+  if (!text) { showToast('Nothing to copy yet'); return; }
+  navigator.clipboard.writeText(text).then(() => showToast('✓ Copied!')).catch(() => { prompt('Copy:', text); });
 }
 
 function switchTab(id) {
