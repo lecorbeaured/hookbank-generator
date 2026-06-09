@@ -1231,19 +1231,39 @@ function updateTabContent(id, content) {
 }
 
 function updateSection14(content) {
-  // Split the raw output into three panels by detecting the section headers
-  const tiktokMatch = content.match(/TIKTOK PINNED COMMENT[\s\S]*?(?=FACEBOOK POST|$)/i);
-  const fbMatch = content.match(/FACEBOOK POST[\s\S]*?(?=INSTAGRAM POST|$)/i);
-  const igMatch = content.match(/INSTAGRAM POST[\s\S]*/i);
-
   const tiktokEl = document.getElementById('out-14-tiktok');
   const fbEl = document.getElementById('out-14-facebook');
   const igEl = document.getElementById('out-14-instagram');
 
-  if (tiktokEl) { tiktokEl.className = 'out-content'; tiktokEl.textContent = tiktokMatch ? tiktokMatch[0].trim() : content; }
-  if (fbEl) { fbEl.className = 'out-content'; fbEl.textContent = fbMatch ? fbMatch[0].trim() : ''; }
-  if (igEl) { igEl.className = 'out-content'; igEl.textContent = igMatch ? igMatch[0].trim() : ''; }
+  // Robust split — find the divider lines between the three sections
+  // The prompt uses --- as dividers and headers like TIKTOK PINNED COMMENT / FACEBOOK POST / INSTAGRAM POST
+  const lines = content.split('\n');
+  let tiktokLines = [], fbLines = [], igLines = [];
+  let current = 'tiktok';
 
+  for (const line of lines) {
+    const upper = line.trim().toUpperCase();
+    if (upper.includes('FACEBOOK POST') || upper.includes('FACEBOOK:')) { current = 'facebook'; continue; }
+    if (upper.includes('INSTAGRAM POST') || upper.includes('INSTAGRAM:')) { current = 'instagram'; continue; }
+    // Skip the TikTok header line itself
+    if (upper.includes('TIKTOK PINNED COMMENT') || upper.includes('TIKTOK:')) { current = 'tiktok'; continue; }
+    if (current === 'tiktok') tiktokLines.push(line);
+    else if (current === 'facebook') fbLines.push(line);
+    else igLines.push(line);
+  }
+
+  const tiktokText = tiktokLines.join('\n').trim();
+  const fbText = fbLines.join('\n').trim();
+  const igText = igLines.join('\n').trim();
+
+  // If split failed (AI used different headers), dump everything in tiktok panel
+  const splitWorked = fbText.length > 20 || igText.length > 20;
+
+  if (tiktokEl) { tiktokEl.className = 'out-content'; tiktokEl.textContent = splitWorked ? tiktokText : content; }
+  if (fbEl) { fbEl.className = 'out-content'; fbEl.textContent = splitWorked ? fbText : ''; }
+  if (igEl) { igEl.className = 'out-content'; igEl.textContent = splitWorked ? igText : ''; }
+
+  // Show action row only after content is present
   const row = document.getElementById('actions-14');
   if (row) {
     row.style.display = 'flex';
@@ -1566,6 +1586,7 @@ function exportLibrary() {
 function addSaveButtons() {
   const toGen = [...selectedSections].map(Number).filter(n => SECTION_PROMPTS[n]).sort((a,b)=>a-b);
   toGen.forEach(id => {
+    if (id === 14) return; // section 14 handles its own save button
     if (!allOutputs[id]) return;
     const row = document.getElementById('actions-'+id);
     if (row && !row.querySelector('.save-hook-btn')) {
