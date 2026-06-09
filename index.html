@@ -1,1027 +1,2010 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>GitPortal</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%23238636'/%3E%3Cpath fill='%23fff' d='M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12c0-5.523-4.477-10-10-10z'/%3E%3C/svg%3E" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HookBank.ai — Powered by AI</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230e0e10'/%3E%3Ccircle cx='16' cy='10' r='4' fill='none' stroke='%23e03c3c' stroke-width='2'/%3E%3Cpath d='M16 14 Q8 18 10 26' fill='none' stroke='%23e03c3c' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M10 26 L8 28 M10 26 L13 27' fill='none' stroke='%23ff6b35' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
   :root {
-    --bg: #0d1117; --surface: #161b22; --surface2: #21262d; --border: #30363d;
-    --accent: #238636; --accent-hover: #2ea043; --danger: #da3633;
-    --text: #e6edf3; --muted: #8b949e;
-    --new: #3fb950; --modified: #d29922; --deleted: #f85149; --renamed: #58a6ff; --purple: #a371f7;
-    --netlify: #00ad9f; --railway: #B847F5; --telegram: #229ED9;
+    --bg: #0e0e10;
+    --bg2: #18181c;
+    --bg3: #22222a;
+    --border: #2e2e38;
+    --text: #f0f0f2;
+    --muted: #888896;
+    --accent: #e03c3c;
+    --accent2: #ff6b35;
+    --green: #22c55e;
+    --blue: #3b82f6;
+    --radius: 10px;
+    --radius-sm: 6px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
 
-  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 16px; height: 52px; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
-  .logo { font-size: 17px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-  .repo-selector { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: 13px; min-width: 200px; cursor: pointer; }
-  .repo-selector:focus { outline: none; border-color: var(--accent); }
-  .branch-badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 5px; cursor: pointer; }
-  .branch-badge:hover { border-color: var(--purple); color: var(--purple); }
-  .spacer { flex: 1; }
-  .user-pill { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
-  .user-pill img { width: 24px; height: 24px; border-radius: 50%; }
-  .btn { border: none; border-radius: 6px; padding: 6px 14px; font-size: 13px; cursor: pointer; font-weight: 500; transition: all .15s; display: inline-flex; align-items: center; gap: 5px; }
-  .btn-green { background: var(--accent); color: #fff; } .btn-green:hover { background: var(--accent-hover); }
-  .btn-blue { background: #1f6feb; color: #fff; } .btn-blue:hover { background: #388bfd; }
-  .btn-ghost { background: var(--surface2); color: var(--text); border: 1px solid var(--border); } .btn-ghost:hover { background: var(--border); }
-  .btn-netlify { background: #00ad9f22; color: var(--netlify); border: 1px solid #00ad9f44; } .btn-netlify:hover { background: #00ad9f33; }
-  .btn-vercel { background: #ffffff15; color: #fff; border: 1px solid #ffffff30; } .btn-vercel:hover { background: #ffffff25; }
-  .btn-railway { background: #B847F522; color: var(--railway); border: 1px solid #B847F544; } .btn-railway:hover { background: #B847F533; }
-  .btn-telegram { background: #229ED922; color: var(--telegram); border: 1px solid #229ED944; } .btn-telegram:hover { background: #229ED933; }
-  .connected-telegram { background: #229ED922; color: var(--telegram); border: 1px solid #229ED944; }
-  .btn-sm { padding: 4px 10px; font-size: 12px; }
-  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  /* LAYOUT */
+  .app { display: grid; grid-template-columns: 280px 1fr; min-height: 100vh; }
+  .sidebar { background: var(--bg2); border-right: 1px solid var(--border); padding: 0; display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .main { padding: 2rem; overflow-y: auto; }
 
-  .main { display: flex; flex: 1; overflow: hidden; }
-  .sidebar { width: 260px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
-  .sidebar-section { padding: 10px 12px; border-bottom: 1px solid var(--border); }
-  .sidebar-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; font-weight: 600; }
-  .file-list { overflow-y: auto; flex: 1; }
-  .file-item { display: flex; align-items: center; gap: 8px; padding: 7px 12px; cursor: pointer; transition: background .1s; }
-  .file-item:hover { background: var(--surface2); }
-  .file-item.selected { background: #1f6feb22; }
-  .file-item input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
-  .file-name { flex: 1; font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .badge { font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 600; flex-shrink: 0; }
-  .badge-new { background: #3fb95022; color: var(--new); border: 1px solid #3fb95044; }
-  .badge-modified { background: #d2992222; color: var(--modified); border: 1px solid #d2992244; }
-  .badge-deleted { background: #f8514922; color: var(--deleted); border: 1px solid #f8514944; }
-  .badge-renamed { background: #58a6ff22; color: var(--renamed); border: 1px solid #58a6ff44; }
+  /* SIDEBAR */
+  .sidebar-header { padding: 1.25rem 1.25rem 1rem; border-bottom: 1px solid var(--border); }
+  .logo { font-size: 18px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .logo-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+  .logo-sub { font-size: 11px; color: var(--muted); margin-top: 2px; font-weight: 400; }
+  .api-box { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
+  .api-box label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .api-input { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 7px 10px; font-size: 13px; font-family: monospace; }
+  .api-input:focus { outline: none; border-color: var(--accent); }
+  .model-select { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 7px 10px; font-size: 13px; margin-top: 8px; }
+  .model-select:focus { outline: none; }
+  .key-status { display:flex; align-items:center; gap:6px; font-size:11px; margin-top:7px; padding:5px 8px; border-radius:var(--radius-sm); }
+  .key-status.saved { background:#0d2318; color:#4ade80; border:1px solid #14532d; }
+  .key-status.missing { background:#1c0e0e; color:#f87171; border:1px solid #3b1919; }
+  .key-status-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+  .key-status.saved .key-status-dot { background:#22c55e; }
+  .key-status.missing .key-status-dot { background:#e03c3c; }
 
-  .panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-  .panel-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); flex-shrink: 0; }
-  .tab { padding: 10px 18px; font-size: 13px; cursor: pointer; color: var(--muted); border-bottom: 2px solid transparent; transition: all .15s; }
-  .tab:hover { color: var(--text); } .tab.active { color: var(--text); border-bottom-color: #f78166; }
-  .panel-body { flex: 1; overflow-y: auto; padding: 20px; }
+  .section-nav { padding: 1rem 1.25rem; flex: 1; }
+  .nav-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; padding-left: 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: var(--radius-sm); font-size: 13px; color: var(--muted); cursor: pointer; margin-bottom: 2px; transition: all 0.15s; position: relative; }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--bg3); color: var(--text); }
+  .nav-item.done::after { content: '✓'; position: absolute; right: 10px; font-size: 11px; color: var(--green); }
+  .nav-item.generating::after { content: ''; position: absolute; right: 10px; width: 8px; height: 8px; border: 1.5px solid var(--muted); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  .nav-num { width: 20px; height: 20px; border-radius: 50%; background: var(--bg3); font-size: 11px; display: flex; align-items: center; justify-content: center; color: var(--muted); flex-shrink: 0; }
+  .nav-item.done .nav-num { background: #14532d; color: var(--green); }
+  .nav-item.generating .nav-num { background: #3b1919; color: var(--accent); }
 
-  .diff-header { font-size: 12px; color: var(--muted); margin-bottom: 12px; padding: 8px 12px; background: var(--surface2); border-radius: 6px; border: 1px solid var(--border); }
-  .diff-code { font-family: 'SF Mono', monospace; font-size: 12px; line-height: 1.6; }
-  .diff-line { padding: 1px 12px; white-space: pre-wrap; word-break: break-all; }
-  .diff-add { background: #3fb95015; color: var(--new); }
-  .diff-remove { background: #f8514915; color: var(--deleted); }
-  .diff-hunk { background: #58a6ff10; color: #58a6ff; font-style: italic; }
+  .sidebar-footer { padding: 1rem 1.25rem; border-top: 1px solid var(--border); }
 
-  /* DEPLOY BAR */
-  .deploy-bar { padding: 10px 16px; background: var(--surface); border-top: 1px solid var(--border); display: none; gap: 10px; align-items: center; flex-wrap: wrap; flex-shrink: 0; }
-  .deploy-bar.visible { display: flex; }
-  .deploy-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; display: flex; align-items: center; gap: 10px; flex: 1; min-width: 200px; }
-  .platform-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
-  .netlify-card .platform-label { color: var(--netlify); }
-  .vercel-card .platform-label { color: #fff; }
-  .railway-card .platform-label { color: var(--railway); }
-  .deploy-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; white-space: nowrap; }
-  .status-ready { background: #3fb95022; color: var(--new); border: 1px solid #3fb95044; }
-  .status-building { background: #d2992222; color: var(--modified); border: 1px solid #d2992244; animation: pulse 1.5s infinite; }
-  .status-error { background: #f8514922; color: var(--deleted); border: 1px solid #f8514944; }
-  .status-unknown { background: var(--border); color: var(--muted); }
-  @keyframes pulse { 0%,100%{opacity:1}50%{opacity:.5} }
-  .deploy-url { font-size: 11px; color: #58a6ff; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 140px; }
-  .deploy-url:hover { text-decoration: underline; }
-  .deploy-spacer { flex: 1; }
+  /* MAIN */
+  .page-header { margin-bottom: 1.5rem; }
+  .page-title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .page-sub { font-size: 13px; color: var(--muted); }
 
-  /* RAILWAY LOG VIEWER */
-  .log-viewer { background: #000; border: 1px solid var(--border); border-radius: 6px; padding: 12px; font-family: 'SF Mono', monospace; font-size: 11px; line-height: 1.7; height: 300px; overflow-y: auto; margin-top: 12px; }
-  .log-line { display: flex; gap: 8px; }
-  .log-time { color: #555; flex-shrink: 0; }
-  .log-msg { color: #e6edf3; word-break: break-all; }
-  .log-error { color: var(--deleted); }
-  .log-warn { color: var(--modified); }
+  /* OFFER INPUT */
+  .offer-card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.5rem; }
+  .offer-card h2 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .offer-card p { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  textarea.offer-textarea { width: 100%; min-height: 140px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 12px; font-size: 13px; font-family: inherit; resize: vertical; line-height: 1.6; }
+  textarea.offer-textarea:focus { outline: none; border-color: var(--accent); }
+  textarea.offer-textarea::placeholder { color: var(--muted); }
 
-  /* RAILWAY SERVICES LIST */
-  .railway-project { margin-bottom: 16px; }
-  .railway-project-name { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 8px; font-weight: 600; padding: 0 4px; }
-  .railway-service-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; margin-bottom: 6px; cursor: pointer; transition: border-color .15s; }
-  .railway-service-item:hover { border-color: var(--railway); }
-  .railway-service-name { flex: 1; font-size: 13px; font-weight: 500; }
-  .railway-service-time { font-size: 11px; color: var(--muted); }
+  /* SECTION PICKS */
+  .picks-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 1.25rem; }
+  .pick-btn { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 12px; color: var(--muted); cursor: pointer; text-align: center; transition: all 0.15s; }
+  .pick-btn:hover { border-color: #444; color: var(--text); }
+  .pick-btn.selected { background: #1c1014; border-color: var(--accent); color: var(--text); }
+  .pick-btn .pick-icon { font-size: 18px; display: block; margin-bottom: 4px; }
 
-  /* COMMIT PANEL */
-  .commit-panel { padding: 14px 16px; background: var(--surface); border-top: 1px solid var(--border); flex-shrink: 0; }
-  .commit-panel textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 10px; font-size: 13px; resize: none; height: 68px; font-family: inherit; line-height: 1.5; }
-  .commit-panel textarea:focus { outline: none; border-color: var(--accent); }
-  .commit-panel textarea::placeholder { color: var(--muted); }
-  .commit-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-  .push-toggle { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); cursor: pointer; }
-  .push-toggle input { accent-color: var(--accent); }
-  .select-all-row { display: flex; align-items: center; gap: 6px; padding: 8px 12px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); cursor: pointer; }
-  .select-all-row:hover { background: var(--surface2); }
+  /* CONTROLS */
+  .controls { display: flex; gap: 10px; margin-bottom: 2rem; flex-wrap: wrap; }
+  .btn { padding: 10px 20px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all 0.15s; }
+  .btn:active { transform: scale(0.97); }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: #c73232; }
+  .btn-primary:disabled { background: #4a2020; color: #886; cursor: not-allowed; transform: none; }
+  .btn-secondary { background: var(--bg2); border: 1px solid var(--border); color: var(--text); }
+  .btn-secondary:hover { background: var(--bg3); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; background: var(--bg3); border: 1px solid var(--border); color: var(--muted); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; }
+  .btn-sm:hover { color: var(--text); border-color: #555; }
 
-  .commit-log-item { padding: 12px; border-bottom: 1px solid var(--border); display: flex; gap: 10px; align-items: flex-start; }
-  .commit-log-item:hover { background: var(--surface2); }
-  .commit-hash { font-family: monospace; font-size: 11px; color: var(--purple); background: var(--surface2); padding: 2px 6px; border-radius: 4px; flex-shrink: 0; }
-  .commit-subject { font-size: 13px; }
-  .commit-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  /* PROGRESS */
+  .progress-wrap { margin-bottom: 1.5rem; display: none; }
+  .progress-bar { height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 0.4s ease; }
+  .progress-text { font-size: 12px; color: var(--muted); }
 
-  .settings-section { margin-bottom: 24px; }
-  .settings-section h3 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-  .settings-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
-  .settings-row input { flex: 1; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 10px; border-radius: 6px; font-size: 13px; font-family: monospace; }
-  .settings-row input:focus { outline: none; border-color: var(--accent); }
-  .connected-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 4px 10px; border-radius: 20px; font-weight: 600; }
-  .connected-netlify { background: #00ad9f22; color: var(--netlify); border: 1px solid #00ad9f44; }
-  .connected-vercel { background: #ffffff15; color: #fff; border: 1px solid #ffffff30; }
-  .connected-github { background: #a371f722; color: var(--purple); border: 1px solid #a371f744; }
-  .connected-railway { background: #B847F522; color: var(--railway); border: 1px solid #B847F544; }
+  /* OUTPUT AREA */
+  .output-area { display: none; }
+  .output-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; overflow-x: auto; }
+  .tab { padding: 9px 16px; font-size: 13px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.15s; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
 
-  .link-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13px; cursor: pointer; }
-  .link-item:hover { background: var(--surface2); }
-  .link-item-name { font-weight: 500; }
-  .link-item-url { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .section-block { display: none; }
+  .section-block.active { display: block; }
+  .section-block h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; color: var(--text); }
+  .section-block .section-meta { font-size: 12px; color: var(--muted); margin-bottom: 1rem; }
 
-  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 100; }
-  .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; width: 480px; max-width: 95vw; max-height: 85vh; overflow-y: auto; }
-  .modal h2 { font-size: 16px; margin-bottom: 16px; }
-  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
-  .form-group { margin-bottom: 14px; }
-  .form-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
-  .form-group input { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 8px 10px; border-radius: 6px; font-size: 13px; }
-  .form-group input:focus { outline: none; border-color: var(--accent); }
-  .form-group .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
-  .toggle-row { display: flex; align-items: center; justify-content: space-between; }
-  .toggle { position: relative; width: 36px; height: 20px; }
-  .toggle input { opacity: 0; width: 0; height: 0; }
-  .toggle-slider { position: absolute; inset: 0; background: var(--border); border-radius: 20px; cursor: pointer; transition: .2s; }
-  .toggle-slider:before { content: ''; position: absolute; height: 14px; width: 14px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .2s; }
-  .toggle input:checked + .toggle-slider { background: var(--accent); }
-  .toggle input:checked + .toggle-slider:before { transform: translateX(16px); }
+  .out-content { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; white-space: pre-wrap; line-height: 1.9; font-size: 13.5px; color: var(--text); min-height: 100px; font-family: inherit; }
+  .out-content.loading { color: var(--muted); font-style: italic; animation: pulse 1.4s ease-in-out infinite; }
 
-  .toast-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 999; }
-  .toast { padding: 10px 16px; border-radius: 8px; font-size: 13px; color: #fff; min-width: 220px; animation: slideIn .2s ease; box-shadow: 0 4px 12px rgba(0,0,0,.4); }
-  .toast-success { background: #238636; } .toast-error { background: #da3633; } .toast-info { background: #1f6feb; }
-  @keyframes slideIn { from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1} }
+  .action-row { display: flex; gap: 8px; margin-top: 10px; }
 
-  #setup-screen { position: fixed; inset: 0; background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 200; }
-  .setup-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 36px; width: 440px; text-align: center; }
-  .setup-card h1 { font-size: 22px; margin-bottom: 6px; }
-  .setup-card p { color: var(--muted); font-size: 13px; margin-bottom: 20px; line-height: 1.6; }
-  .setup-card input { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px 12px; border-radius: 6px; font-size: 13px; margin-bottom: 12px; font-family: monospace; }
-  .setup-card a { color: #58a6ff; font-size: 12px; }
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 4rem 2rem; color: var(--muted); }
+  .empty-icon { font-size: 48px; margin-bottom: 1rem; }
+  .empty-title { font-size: 16px; color: var(--text); font-weight: 600; margin-bottom: 8px; }
+  .empty-desc { font-size: 13px; line-height: 1.6; max-width: 400px; margin: 0 auto; }
 
-  .loading { display: inline-block; width: 12px; height: 12px; border: 2px solid rgba(255,255,255,.3); border-top-color: #fff; border-radius: 50%; animation: spin .6s linear infinite; }
-  @keyframes spin { to{transform:rotate(360deg)} }
-  .ahead-badge { background: var(--modified); color: #000; border-radius: 10px; font-size: 10px; padding: 1px 7px; font-weight: 700; }
-  .no-repo { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 16px; color: var(--muted); text-align: center; padding: 40px; }
-  .no-repo h3 { color: var(--text); font-size: 16px; }
-  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--muted); gap: 12px; text-align: center; }
-  .empty-state p { font-size: 13px; }
-</style>
+  /* VIRALITY TABLE */
+  .viral-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .viral-table th { text-align: left; padding: 8px 10px; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
+  .viral-table td { padding: 10px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .viral-table tr:last-child td { border-bottom: none; }
+
+  /* SCORE BADGE */
+  .score { display: inline-block; padding: 2px 8px; border-radius: 100px; font-size: 11px; font-weight: 700; }
+  .score-high { background: #14532d; color: #4ade80; }
+  .score-mid { background: #433010; color: #fbbf24; }
+  .score-low { background: #3b1919; color: #f87171; }
+
+  /* TAG */
+  .tag { display: inline-block; padding: 2px 8px; background: var(--bg3); border: 1px solid var(--border); border-radius: 100px; font-size: 11px; color: var(--muted); margin: 2px; }
+
+  /* SAVED */
+  .saved-list { display: flex; flex-direction: column; gap: 8px; }
+  .saved-item { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; cursor: pointer; transition: border-color 0.15s; }
+  .saved-item:hover { border-color: #555; }
+  .saved-item-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .saved-item-meta { font-size: 11px; color: var(--muted); }
+
+  /* TOAST */
+  .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 16px; font-size: 13px; color: var(--text); z-index: 9999; opacity: 0; transform: translateY(10px); transition: all 0.3s; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* REPURPOSE PANEL */
+  .repurpose-drawer { position: fixed; top: 0; right: -480px; width: 460px; height: 100vh; background: var(--bg2); border-left: 1px solid var(--border); z-index: 1000; display: flex; flex-direction: column; transition: right 0.3s ease; overflow: hidden; }
+  .repurpose-drawer.open { right: 0; }
+  .repurpose-header { padding: 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .repurpose-title { font-size: 14px; font-weight: 600; }
+  .repurpose-close { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 2px 6px; border-radius: var(--radius-sm); }
+  .repurpose-close:hover { color: var(--text); background: var(--bg3); }
+  .repurpose-body { padding: 1.25rem; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+  .repurpose-source { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; color: var(--muted); line-height: 1.6; max-height: 120px; overflow-y: auto; white-space: pre-wrap; }
+  .repurpose-source-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .transform-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .transform-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; color: var(--muted); cursor: pointer; text-align: left; transition: all 0.15s; line-height: 1.4; }
+  .transform-btn:hover { border-color: var(--accent); color: var(--text); background: #1c1014; }
+  .transform-btn.active { border-color: var(--accent); color: var(--text); background: #1c1014; }
+  .transform-btn .tb-icon { font-size: 16px; display: block; margin-bottom: 4px; }
+  .transform-btn .tb-label { font-weight: 600; color: var(--text); display: block; margin-bottom: 2px; }
+  .repurpose-output { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; font-size: 13px; color: var(--text); white-space: pre-wrap; line-height: 1.8; min-height: 120px; display: none; }
+  .repurpose-output.loading { color: var(--muted); font-style: italic; animation: pulse 1.4s ease-in-out infinite; display: block; }
+  .repurpose-output.ready { display: block; }
+  .repurpose-actions { display: flex; gap: 8px; flex-shrink: 0; padding: 1rem 1.25rem; border-top: 1px solid var(--border); }
+  .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
+  .overlay.show { display: block; }
+  .repurpose-btn { display: inline-flex; align-items: center; gap: 4px; padding: 5px 10px; font-size: 11px; background: #1c1014; border: 1px solid #3b1919; color: #f87171; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; margin-left: 6px; }
+  .repurpose-btn:hover { background: #2a1414; border-color: var(--accent); color: var(--text); }
+  @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 0.9; } }
+
+  /* BOOK UPLOAD */
+  .book-upload-zone { border: 1.5px dashed var(--border); border-radius: var(--radius); padding: 1.25rem; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--bg3); }
+  .book-upload-zone:hover { border-color: var(--accent); background: #1c1014; }
+  .book-upload-zone.dragover { border-color: var(--accent); background: #1c1014; }
+  .book-upload-zone.loaded { border-color: var(--green); background: #0d2318; }
+  .book-upload-icon { font-size: 28px; display: block; margin-bottom: 8px; }
+  .book-upload-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .book-upload-sub { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  .book-status { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: var(--radius-sm); font-size: 12px; margin-top: 8px; }
+  .book-status.loaded { background: #0d2318; border: 1px solid #14532d; color: #4ade80; }
+  .book-status.empty { background: var(--bg3); border: 1px solid var(--border); color: var(--muted); }
+  .book-indicator { display: flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: var(--radius-sm); font-size: 11px; cursor: pointer; margin-top: 6px; width: 100%; }
+  .book-indicator.loaded { background: #0d2318; border: 1px solid #14532d; color: #4ade80; }
+  .book-indicator.empty { background: var(--bg3); border: 1px solid var(--border); color: var(--muted); }
+  .book-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .book-indicator.loaded .book-dot { background: var(--green); }
+  .book-indicator.empty .book-dot { background: var(--muted); }
+
+  /* BULK GENERATE MODAL */
+  .bgen-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 1100; display: none; align-items: center; justify-content: center; }
+  .bgen-overlay.open { display: flex; }
+  .bgen-modal { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); width: 540px; max-width: 95vw; max-height: 88vh; display: flex; flex-direction: column; overflow: hidden; }
+  .bgen-header { padding: 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+  .bgen-title { font-size: 15px; font-weight: 700; }
+  .bgen-close { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; padding: 2px 6px; border-radius: var(--radius-sm); }
+  .bgen-close:hover { color: var(--text); background: var(--bg3); }
+  .bgen-body { padding: 1.25rem; flex: 1; overflow-y: auto; }
+  .bgen-book-badge { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: #0d2318; border: 1px solid #14532d; border-radius: var(--radius-sm); font-size: 12px; color: #4ade80; margin-bottom: 1.25rem; }
+  .bgen-section-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 1.25rem; }
+  .bgen-section-item { display: flex; align-items: center; gap: 8px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; cursor: pointer; transition: all 0.15s; user-select: none; }
+  .bgen-section-item:hover { border-color: #555; }
+  .bgen-section-item.selected { background: #1c1014; border-color: var(--accent); }
+  .bgen-section-item input[type=checkbox] { accent-color: var(--accent); width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
+  .bgen-section-label { font-size: 12px; color: var(--muted); }
+  .bgen-section-item.selected .bgen-section-label { color: var(--text); }
+  .bgen-progress { margin-bottom: 1rem; display: none; }
+  .bgen-footer { padding: 1rem 1.25rem; border-top: 1px solid var(--border); display: flex; gap: 8px; flex-shrink: 0; flex-wrap: wrap; }
+
+  /* RESPONSIVE */
+  @media (max-width: 700px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; }
+    .picks-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* SAVED HOOKS LIBRARY */
+  .library-item { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 10px; }
+  .library-item-text { flex: 1; font-size: 13px; line-height: 1.5; cursor: pointer; }
+  .library-item-text:hover { color: var(--accent2); }
+  .library-item-meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .library-item-actions { display: flex; gap: 4px; flex-shrink: 0; }
+  .lib-tag { display: inline-block; padding: 1px 7px; background: var(--bg3); border: 1px solid var(--border); border-radius: 100px; font-size: 10px; color: var(--muted); margin-right: 4px; }
+  .lib-tag.pinterest { border-color: #7B2D8B; color: #C77DDB; background: #1a0d1e; }
+  .lib-tag.tiktok { border-color: #1a5c5c; color: #4DC8C8; background: #0d1a1a; }
+  .lib-tag.email { border-color: #1a3a5c; color: #5B9BD5; background: #0d1520; }
+  .lib-tag.hook { border-color: #5c3a1a; color: #D5855B; background: #1a120d; }
+  .lib-tag.script { border-color: #2a5c1a; color: #7DD55B; background: #0f1a0d; }
+  .save-hook-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 9px; font-size: 11px; background: #0d1a12; border: 1px solid #14532d; color: #4ade80; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.15s; margin-left: 4px; }
+  .save-hook-btn:hover { background: #0f2018; }
+  .lib-empty { text-align: center; padding: 2rem; color: var(--muted); font-size: 13px; }
+
+  /* OFFER HISTORY */
+  .history-item { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 6px; cursor: pointer; transition: border-color 0.15s; display: flex; align-items: center; gap: 10px; }
+  .history-item:hover { border-color: #555; }
+  .history-item-name { font-size: 13px; font-weight: 600; flex: 1; }
+  .history-item-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .history-item-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 2px 6px; border-radius: 4px; }
+  .history-item-del:hover { color: var(--accent); background: var(--bg3); }
+
+  /* PLATFORM OPTIMIZER */
+  .platform-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1rem; }
+  .platform-btn { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px; font-size: 12px; color: var(--muted); cursor: pointer; text-align: center; transition: all 0.15s; }
+  .platform-btn:hover { border-color: #555; color: var(--text); }
+  .platform-btn.active { border-color: var(--accent); color: var(--text); background: #1c1014; }
+  .platform-btn .pl-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+
+  /* BULK GENERATOR */
+  .bulk-input { width: 100%; min-height: 120px; background: var(--bg3); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 10px 12px; font-size: 13px; font-family: inherit; resize: vertical; line-height: 1.6; }
+  .bulk-input:focus { outline: none; border-color: var(--accent); }
+  .bulk-result-item { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; }
+  .bulk-result-product { font-size: 11px; color: var(--accent2); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .bulk-result-text { font-size: 13px; line-height: 1.7; white-space: pre-wrap; }
+
+  /* TOOL TABS */
+  .tool-nav { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; overflow-x: auto; }
+  .tool-tab { padding: 9px 16px; font-size: 13px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.15s; }
+  .tool-tab:hover { color: var(--text); }
+  .tool-tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+  .tool-panel { display: none; }
+  .tool-panel.active { display: block; }
+
+  /* CSV EXPORT */
+  .cal-preview { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-top: 1rem; }
+  .cal-row { display: grid; grid-template-columns: 50px 1fr 1fr 1fr 1fr; gap: 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .cal-row:last-child { border-bottom: none; }
+  .cal-row.header { background: var(--bg3); font-weight: 600; color: var(--muted); font-size: 11px; text-transform: uppercase; }
+  .cal-cell { padding: 8px 10px; border-right: 1px solid var(--border); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cal-cell:last-child { border-right: none; }</style>
 </head>
 <body>
 
-<div id="setup-screen" style="display:none">
-  <div class="setup-card">
-    <svg width="44" height="44" viewBox="0 0 24 24" fill="currentColor" style="margin-bottom:16px"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-    <h1>Welcome to GitPortal</h1>
-    <p>Connect your GitHub account to get started.</p>
-    <input type="password" id="setup-token" placeholder="ghp_xxxxxxxxxxxxxxxx" />
-    <p style="margin-bottom:16px"><a href="https://github.com/settings/tokens/new?scopes=repo" target="_blank">→ Generate a token on GitHub</a></p>
-    <button class="btn btn-green" style="width:100%;padding:10px;justify-content:center" onclick="saveToken()">Connect GitHub Account</button>
-  </div>
-</div>
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo"><div class="logo-dot"></div> HookBank.ai</div>
 
-<div class="topbar">
-  <div class="logo">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-    GitPortal
-  </div>
-  <select id="repo-select" class="repo-selector" onchange="selectRepo(this.value)">
-    <option value="">— Select a repository —</option>
-  </select>
-  <div class="branch-badge" onclick="showBranchModal()" id="branch-display" style="display:none">
-    <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 3.25a2.25 2.25 0 1 1 3 2.122V6A2.5 2.5 0 0 1 10 8.5H6a1 1 0 0 0-1 1v1.128a2.251 2.251 0 1 1-1.5 0V5.372a2.25 2.25 0 1 1 1.5 0v1.836A2.493 2.493 0 0 1 6 7h4a1 1 0 0 0 1-1v-.628A2.25 2.25 0 0 1 9.5 3.25Z"/></svg>
-    <span id="branch-name">main</span>
-    <span id="ahead-badge" style="display:none" class="ahead-badge"></span>
-  </div>
-  <button class="btn btn-ghost btn-sm" onclick="showPullConfirm()" id="pull-btn" style="display:none">↓ Pull</button>
-  <div class="spacer"></div>
-  <button class="btn btn-ghost btn-sm" onclick="showAddRepoModal()">+ Add Repo</button>
-  <button class="btn btn-blue btn-sm" onclick="showNewRepoModal()">✦ New Repo</button>
-  <button class="btn btn-ghost btn-sm" onclick="switchTab('settings')" title="Settings">⚙</button>
-  <div class="user-pill" id="user-pill" style="display:none">
-    <img id="user-avatar" src="" alt=""/><span id="user-login"></span>
-  </div>
-</div>
-
-<div class="main">
-  <div class="sidebar">
-    <div class="sidebar-section"><div class="sidebar-label">Changed Files</div></div>
-    <div class="select-all-row" onclick="toggleSelectAll()" id="select-all-row" style="display:none">
-      <input type="checkbox" id="select-all-cb" style="accent-color:var(--accent);width:14px;height:14px;" />
-      <span>Select all</span>
-      <span id="file-count" style="margin-left:auto;color:var(--muted);font-size:11px"></span>
-    </div>
-    <div class="file-list" id="file-list">
-      <div class="empty-state" style="padding:40px 20px"><p>Select a repository</p></div>
-    </div>
-  </div>
-
-  <div class="panel">
-    <div class="no-repo" id="no-repo-msg">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M16 3v4M8 3v4M3 11h18"/></svg>
-      <h3>No repository selected</h3>
-      <p>Choose a repo from the dropdown, or add / create a new one.</p>
     </div>
 
-    <div id="repo-view" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
-      <div class="panel-tabs">
-        <div class="tab active" onclick="switchTab('changes')" id="tab-changes">Changes</div>
-        <div class="tab" onclick="switchTab('history')" id="tab-history">History</div>
-        <div class="tab" onclick="switchTab('railway')" id="tab-railway">🚂 Railway</div>
-        <div class="tab" onclick="switchTab('settings')" id="tab-settings">⚙ Settings</div>
+    <div class="api-box">
+      <label>OpenRouter API Key</label>
+      <input type="password" class="api-input" id="api-key" placeholder="sk-or-v1-..." oninput="saveKey(this.value)">
+      <select class="model-select" id="model-select" onchange="saveModel(this.value)">
+        <option value="deepseek/deepseek-chat">DeepSeek V3 (cheapest, fast)</option>
+        <option value="deepseek/deepseek-r1">DeepSeek R1 (reasoning)</option>
+        <option value="anthropic/claude-sonnet-4-5">Claude Sonnet 4.5</option>
+        <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
+        <option value="openai/gpt-4o">GPT-4o</option>
+        <option value="meta-llama/llama-3.3-70b-instruct">Llama 3.3 70B (free)</option>
+      </select>
+      <div class="key-status missing" id="key-status">
+        <div class="key-status-dot"></div>
+        <span id="key-status-text">No API key — enter key above</span>
+      </div>
+    </div>
+
+    <div class="section-nav">
+      <div class="nav-label">Sections</div>
+      <div class="nav-item active" id="nav-0" onclick="jumpToSection(0)"><div class="nav-num">0</div> Offer setup</div>
+      <div class="nav-item" id="nav-1" onclick="jumpToSection(1)"><div class="nav-num">1</div> Core hook points</div>
+      <div class="nav-item" id="nav-2" onclick="jumpToSection(2)"><div class="nav-num">2</div> Hook bank (50)</div>
+      <div class="nav-item" id="nav-3" onclick="jumpToSection(3)"><div class="nav-num">3</div> Video hooks</div>
+      <div class="nav-item" id="nav-4" onclick="jumpToSection(4)"><div class="nav-num">4</div> Pinterest hooks</div>
+      <div class="nav-item" id="nav-5" onclick="jumpToSection(5)"><div class="nav-num">5</div> Blog hooks</div>
+      <div class="nav-item" id="nav-6" onclick="jumpToSection(6)"><div class="nav-num">6</div> Email hooks</div>
+      <div class="nav-item" id="nav-7" onclick="jumpToSection(7)"><div class="nav-num">7</div> Lead magnets</div>
+      <div class="nav-item" id="nav-8" onclick="jumpToSection(8)"><div class="nav-num">8</div> Social content</div>
+      <div class="nav-item" id="nav-9" onclick="jumpToSection(9)"><div class="nav-num">9</div> Sales page</div>
+      <div class="nav-item" id="nav-10" onclick="jumpToSection(10)"><div class="nav-num">10</div> Monetization</div>
+      <div class="nav-item" id="nav-11" onclick="jumpToSection(11)"><div class="nav-num">11</div> Virality scores</div>
+      <div class="nav-item" id="nav-12" onclick="jumpToSection(12)"><div class="nav-num">12</div> 30-day plan</div>
+      <div class="nav-item" id="nav-13" onclick="jumpToSection(13)"><div class="nav-num">13</div> Voiceover scripts</div>
+    </div>
+
+    <div class="section-nav" style="border-top:1px solid var(--border);padding-top:1rem">
+      <div class="nav-label">Tools</div>
+      <div class="nav-item" id="nav-library" onclick="openTool('library')"><div class="nav-num">💾</div> Saved hooks</div>
+      <div class="nav-item" id="nav-history" onclick="openTool('history')"><div class="nav-num">📂</div> Offer history</div>
+      <div class="nav-item" id="nav-optimizer" onclick="openTool('optimizer')"><div class="nav-num">🎯</div> Platform optimizer</div>
+      <div class="nav-item" id="nav-bulk" onclick="openTool('bulk')"><div class="nav-num">⚡</div> Bulk pin generator</div>
+      <div class="nav-item" id="nav-calendar" onclick="openTool('calendar')"><div class="nav-num">📊</div> Calendar CSV export</div>
+      <div class="nav-item" id="nav-bookupload" onclick="openTool('bookupload')"><div class="nav-num">📖</div> Book / doc upload</div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="book-indicator empty" id="book-indicator-sidebar" onclick="openTool('bookupload')" style="cursor:pointer">
+        <div class="book-dot"></div>
+        <span id="book-indicator-text">No book loaded</span>
+      </div>
+      <button class="btn btn-primary" style="width:100%;font-size:12px;margin-top:6px" id="sidebar-gen-book-btn" onclick="openBulkGenModal()" disabled title="Upload a book first">📖 Generate from book</button>
+      <button class="btn btn-secondary" style="width:100%;font-size:12px;margin-top:6px" onclick="exportAll()">⬇ Export all as .txt</button>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- SETUP PAGE -->
+    <div id="page-0" class="page active">
+      <div class="page-header">
+        <div class="page-title">Build your Hook Bank</div>
+        <div class="page-sub">Paste your offer below. The AI will generate 500+ hooks, pins, emails, voiceover scripts, content ideas, and a 30-day plan.</div>
       </div>
 
-      <div class="panel-body" id="diff-view">
-        <div class="empty-state">
-          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          <p>Select a file to see its diff</p>
+      <div class="offer-card">
+        <h2>Your offer</h2>
+        <p>Describe your product, service, ebook, SaaS, affiliate site, newsletter, or idea. Include your audience, niche, and any context about pain points or competition.</p>
+        <textarea class="offer-textarea" id="offer-input" placeholder="Example: A Pinterest-to-Amazon affiliate site called KitchenPicksPro targeting busy home cooks who want to find the best kitchen appliances without wasting hours researching. We review espresso machines, air fryers, knife sets, stand mixers, and kitchen gadgets. Pain points: too many options, fake reviews, don't know which products last. Amazon Associate tag: ericcoste-20."></textarea>
+      </div>
+
+      <div style="margin-bottom:1rem">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em">Select sections to generate</div>
+        <div class="picks-grid" id="picks-grid">
+          <div class="pick-btn selected" data-id="1" onclick="togglePick(this)"><span class="pick-icon">🎯</span>Core hooks</div>
+          <div class="pick-btn selected" data-id="2" onclick="togglePick(this)"><span class="pick-icon">📋</span>Hook bank</div>
+          <div class="pick-btn selected" data-id="3" onclick="togglePick(this)"><span class="pick-icon">🎬</span>Video hooks</div>
+          <div class="pick-btn selected" data-id="4" onclick="togglePick(this)"><span class="pick-icon">📌</span>Pinterest</div>
+          <div class="pick-btn selected" data-id="5" onclick="togglePick(this)"><span class="pick-icon">📝</span>Blog hooks</div>
+          <div class="pick-btn selected" data-id="6" onclick="togglePick(this)"><span class="pick-icon">✉️</span>Email hooks</div>
+          <div class="pick-btn selected" data-id="7" onclick="togglePick(this)"><span class="pick-icon">🎁</span>Lead magnets</div>
+          <div class="pick-btn selected" data-id="8" onclick="togglePick(this)"><span class="pick-icon">📱</span>Social content</div>
+          <div class="pick-btn selected" data-id="9" onclick="togglePick(this)"><span class="pick-icon">💰</span>Sales page</div>
+          <div class="pick-btn selected" data-id="10" onclick="togglePick(this)"><span class="pick-icon">💎</span>Monetization</div>
+          <div class="pick-btn selected" data-id="11" onclick="togglePick(this)"><span class="pick-icon">🔥</span>Virality</div>
+          <div class="pick-btn selected" data-id="12" onclick="togglePick(this)"><span class="pick-icon">📅</span>30-day plan</div>
+          <div class="pick-btn selected" data-id="13" onclick="togglePick(this)"><span class="pick-icon">🎙️</span>Voiceovers</div>
         </div>
       </div>
 
-      <div class="panel-body" id="history-view" style="display:none">
-        <div id="commit-log"></div>
+      <div class="controls">
+        <button class="btn btn-secondary" onclick="selectAll()">Select all</button>
+        <button class="btn btn-secondary" onclick="deselectAll()">Deselect all</button>
+        <button class="btn btn-primary" id="run-btn" onclick="runAll()">⚡ Generate Hook Bank</button>
       </div>
 
-      <!-- RAILWAY TAB -->
-      <div class="panel-body" id="railway-view" style="display:none">
-        <div id="railway-content">
-          <div class="empty-state"><p>Connect Railway in Settings to see your services</p></div>
+      <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+        <div class="progress-text" id="progress-text">Starting...</div>
+      </div>
+
+      <div class="empty-state" id="empty-state">
+        <div class="empty-icon">🎣</div>
+        <div class="empty-title">Your hook bank is empty</div>
+        <div class="empty-desc">Paste your offer above, add your OpenRouter API key, select sections, and click Generate. Results appear in real-time as each section completes.</div>
+      </div>
+    </div>
+
+    <!-- RESULTS PAGE -->
+    <div id="page-results" class="page" style="display:none">
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <div class="page-title" id="results-title">Hook Bank</div>
+          <div class="page-sub" id="results-sub">Generated results</div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-sm" onclick="showSetup()">← Back to setup</button>
+          <button class="btn-sm" onclick="copyCurrentSection()">📋 Copy section</button>
+          <button class="btn-sm" onclick="exportAll()">⬇ Export all</button>
         </div>
       </div>
 
-      <div class="panel-body" id="settings-view" style="display:none">
-        <div class="settings-section">
-          <h3>GitHub</h3>
-          <div id="github-status"></div>
-        </div>
-        <div class="settings-section">
-          <h3>Netlify</h3>
-          <div id="netlify-status" style="margin-bottom:10px"></div>
-          <div class="settings-row">
-            <input type="password" id="netlify-token-input" placeholder="Netlify Personal Access Token" />
-            <button class="btn btn-netlify btn-sm" onclick="saveNetlifyToken()">Connect</button>
-          </div>
-          <div id="netlify-link-section" style="display:none;margin-top:14px">
-            <div class="sidebar-label" style="margin-bottom:8px">Link current repo to Netlify</div>
-            <div id="netlify-linked-info"></div>
-            <button class="btn btn-ghost btn-sm" onclick="showNetlifyLinkModal()" style="margin-top:6px">🔗 Link / Change Site</button>
-          </div>
-        </div>
-        <div class="settings-section">
-          <h3>Vercel</h3>
-          <div id="vercel-status" style="margin-bottom:10px"></div>
-          <div class="settings-row">
-            <input type="password" id="vercel-token-input" placeholder="Vercel Access Token" />
-            <button class="btn btn-vercel btn-sm" onclick="saveVercelToken()">Connect</button>
-          </div>
-          <div id="vercel-link-section" style="display:none;margin-top:14px">
-            <div class="sidebar-label" style="margin-bottom:8px">Link current repo to Vercel</div>
-            <div id="vercel-linked-info"></div>
-            <button class="btn btn-ghost btn-sm" onclick="showVercelLinkModal()" style="margin-top:6px">🔗 Link / Change Project</button>
-          </div>
-        </div>
-        <div class="settings-section">
-          <h3>Telegram Alerts</h3>
-          <div id="telegram-status" style="margin-bottom:10px"></div>
-          <div class="settings-row">
-            <input type="password" id="telegram-bot-token" placeholder="Bot Token (from @BotFather)" style="flex:2" />
-            <input type="text" id="telegram-chat-id" placeholder="Chat ID" style="flex:1" />
-            <button class="btn btn-telegram btn-sm" onclick="saveTelegramToken()">Connect</button>
-          </div>
-          <div class="form-group" style="margin-top:6px">
-            <div class="hint">Create a bot via @BotFather on Telegram. Your Chat ID: 7477833460</div>
-          </div>
-          <div id="telegram-actions" style="display:none;margin-top:10px;gap:8px;display:none">
-            <button class="btn btn-ghost btn-sm" onclick="testTelegram()">📤 Send Test Message</button>
-          </div>
-        </div>
-        <div class="settings-section">
-          <h3>Railway</h3>
-          <div id="railway-status" style="margin-bottom:10px"></div>
-          <div class="settings-row">
-            <input type="password" id="railway-token-input" placeholder="Railway API Token" />
-            <button class="btn btn-railway btn-sm" onclick="saveRailwayToken()">Connect</button>
-          </div>
-          <div class="form-group" style="margin-top:6px">
-            <div class="hint">Generate at: railway.com → Account Settings → Tokens → Create Token</div>
-          </div>
-          <div id="railway-link-section" style="display:none;margin-top:14px">
-            <div class="sidebar-label" style="margin-bottom:8px">Link current repo to Railway service</div>
-            <div id="railway-linked-info"></div>
-            <button class="btn btn-ghost btn-sm" onclick="showRailwayLinkModal()" style="margin-top:6px">🔗 Link / Change Service</button>
-          </div>
+      <div class="output-tabs" id="output-tabs"></div>
+      <div id="output-sections"></div>
+    </div>
+
+    <!-- SAVED HOOKS LIBRARY -->
+    <div id="page-library" class="page" style="display:none">
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div><div class="page-title">💾 Saved hooks</div><div class="page-sub">Your personal swipe file — saved across sessions</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn-sm" onclick="clearLibrary()">🗑 Clear all</button>
+          <button class="btn-sm" onclick="exportLibrary()">⬇ Export</button>
         </div>
       </div>
-    </div>
-
-    <!-- DEPLOY BAR -->
-    <div class="deploy-bar" id="deploy-bar">
-      <div class="deploy-card netlify-card" id="netlify-deploy-card" style="display:none">
-        <div><div class="platform-label">◆ Netlify</div><div id="netlify-site-name" style="font-size:12px;color:var(--muted);margin-top:2px"></div></div>
-        <span class="deploy-status status-unknown" id="netlify-deploy-status">—</span>
-        <a href="#" class="deploy-url" id="netlify-deploy-url" target="_blank" style="display:none"></a>
-        <div class="deploy-spacer"></div>
-        <button class="btn btn-netlify btn-sm" onclick="triggerNetlifyDeploy()" id="netlify-deploy-btn">▶ Deploy</button>
+      <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+        <button class="btn-sm lib-filter active" data-tag="all" onclick="filterLibrary(this,'all')">All</button>
+        <button class="btn-sm lib-filter" data-tag="hook" onclick="filterLibrary(this,'hook')">Hooks</button>
+        <button class="btn-sm lib-filter" data-tag="pinterest" onclick="filterLibrary(this,'pinterest')">Pinterest</button>
+        <button class="btn-sm lib-filter" data-tag="tiktok" onclick="filterLibrary(this,'tiktok')">TikTok</button>
+        <button class="btn-sm lib-filter" data-tag="email" onclick="filterLibrary(this,'email')">Email</button>
+        <button class="btn-sm lib-filter" data-tag="script" onclick="filterLibrary(this,'script')">Scripts</button>
       </div>
-      <div class="deploy-card vercel-card" id="vercel-deploy-card" style="display:none">
-        <div><div class="platform-label">▲ Vercel</div><div id="vercel-project-name" style="font-size:12px;color:var(--muted);margin-top:2px"></div></div>
-        <span class="deploy-status status-unknown" id="vercel-deploy-status">—</span>
-        <a href="#" class="deploy-url" id="vercel-deploy-url" target="_blank" style="display:none"></a>
-        <div class="deploy-spacer"></div>
-        <button class="btn btn-vercel btn-sm" onclick="triggerVercelDeploy()" id="vercel-deploy-btn">▶ Deploy</button>
+      <div id="library-list"><div class="lib-empty">No saved hooks yet.<br>Click the 💾 Save button on any hook to add it here.</div></div>
+    </div>
+
+    <!-- OFFER HISTORY -->
+    <div id="page-history" class="page" style="display:none">
+      <div class="page-header" style="display:flex;align-items:center;justify-content:space-between">
+        <div><div class="page-title">📂 Offer history</div><div class="page-sub">Switch between saved offers without re-typing</div></div>
+        <button class="btn-sm" onclick="saveCurrentOffer()">💾 Save current offer</button>
       </div>
-      <div class="deploy-card railway-card" id="railway-deploy-card" style="display:none">
-        <div><div class="platform-label">🚂 Railway</div><div id="railway-service-name" style="font-size:12px;color:var(--muted);margin-top:2px"></div></div>
-        <span class="deploy-status status-unknown" id="railway-deploy-status">—</span>
-        <div class="deploy-spacer"></div>
-        <button class="btn btn-railway btn-sm" onclick="triggerRailwayRedeploy()" id="railway-deploy-btn">↺ Redeploy</button>
-        <button class="btn btn-ghost btn-sm" onclick="showRailwayLogs()" id="railway-logs-btn">📋 Logs</button>
+      <div id="history-list"><div class="lib-empty">No saved offers yet.<br>Click "Save current offer" to save the offer in your setup box.</div></div>
+    </div>
+
+    <!-- PLATFORM OPTIMIZER -->
+    <div id="page-optimizer" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-title">🎯 Platform optimizer</div>
+        <div class="page-sub">Paste any hook and optimize it for a specific platform's algorithm and audience</div>
       </div>
-      <!-- UPTIME BAR -->
-      <div id="uptime-bar" style="width:100%;padding:6px 16px;background:var(--surface2);border-top:1px solid var(--border);font-size:11px;color:var(--muted);display:none;gap:12px;align-items:center;flex-wrap:wrap" class="uptime-bar">
+      <div class="offer-card" style="margin-bottom:1rem">
+        <h2>Hook or content to optimize</h2>
+        <textarea class="offer-textarea" id="optimizer-input" placeholder="Paste any hook, title, description, or content here..." style="min-height:80px"></textarea>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.05em">Optimize for platform</div>
+      <div class="platform-grid">
+        <div class="platform-btn active" data-platform="pinterest" onclick="selectPlatform(this)"><span class="pl-icon">📌</span>Pinterest SEO</div>
+        <div class="platform-btn" data-platform="tiktok" onclick="selectPlatform(this)"><span class="pl-icon">🎵</span>TikTok algorithm</div>
+        <div class="platform-btn" data-platform="instagram" onclick="selectPlatform(this)"><span class="pl-icon">📸</span>Instagram Reels</div>
+        <div class="platform-btn" data-platform="youtube" onclick="selectPlatform(this)"><span class="pl-icon">▶️</span>YouTube Shorts</div>
+        <div class="platform-btn" data-platform="email" onclick="selectPlatform(this)"><span class="pl-icon">✉️</span>Email deliverability</div>
+        <div class="platform-btn" data-platform="twitter" onclick="selectPlatform(this)"><span class="pl-icon">🐦</span>X/Twitter</div>
+      </div>
+      <div style="margin-top:1rem;display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="runOptimizer()">🎯 Optimize now</button>
+      </div>
+      <div id="optimizer-output" style="display:none;margin-top:1rem">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">Optimized output</div>
+        <div class="out-content" id="optimizer-result"></div>
+        <div class="action-row">
+          <button class="btn-sm" onclick="copyEl('optimizer-result')">📋 Copy</button>
+          <button class="save-hook-btn" onclick="saveToLibrary(document.getElementById('optimizer-result').textContent,'optimizer','hook')">💾 Save</button>
+        </div>
       </div>
     </div>
 
-    <div class="commit-panel" id="commit-panel" style="display:none">
-      <textarea id="commit-msg" placeholder="Commit message (required)…"></textarea>
-      <div class="commit-row">
-        <label class="push-toggle"><input type="checkbox" id="push-toggle" checked />Push to GitHub</label>
-        <label class="push-toggle" id="auto-deploy-toggle-wrap" style="display:none"><input type="checkbox" id="auto-deploy-toggle" checked />Auto-deploy after push</label>
-        <div class="spacer"></div>
-        <button class="btn btn-ghost btn-sm" onclick="refreshStatus()">↺</button>
-        <button class="btn btn-green" id="commit-btn" onclick="doCommit()">Commit</button>
+    <!-- BULK PIN GENERATOR -->
+    <div id="page-bulk" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-title">⚡ Bulk pin description generator</div>
+        <div class="page-sub">Paste up to 20 product names — get a full Pinterest description for each in one run</div>
+      </div>
+      <div class="offer-card" style="margin-bottom:1rem">
+        <h2>Product list</h2>
+        <p>One product per line. Include brand and model for best results.</p>
+        <textarea class="bulk-input" id="bulk-input" placeholder="Breville Barista Express Espresso Machine&#10;Ninja AF101 Air Fryer 4 Qt&#10;KitchenAid Artisan 5-Qt Stand Mixer&#10;Wusthof Classic 8-inch Chef Knife&#10;Instant Pot Duo 7-in-1"></textarea>
+      </div>
+      <div class="field" style="margin-bottom:1rem">
+        <label style="font-size:12px;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em">Output type</label>
+        <select id="bulk-type" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:7px 10px;font-size:13px;width:auto">
+          <option value="pin-desc">Pinterest description</option>
+          <option value="pin-title">Pinterest title</option>
+          <option value="pin-overlay">Pin overlay text</option>
+          <option value="tiktok-hook">TikTok hook</option>
+          <option value="email-subject">Email subject line</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" onclick="runBulk()">⚡ Generate all</button>
+      <div id="bulk-output" style="margin-top:1.25rem;display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em">Results</div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-sm" onclick="copyEl('bulk-results')">📋 Copy all</button>
+            <button class="btn-sm" onclick="downloadBulk()">⬇ Download</button>
+          </div>
+        </div>
+        <div id="bulk-results"></div>
       </div>
     </div>
-  </div>
+
+    <!-- CALENDAR CSV EXPORT -->
+    <div id="page-calendar" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-title">📊 Calendar CSV export</div>
+        <div class="page-sub">Export your 30-day content plan as a CSV for Notion, Google Sheets, or any scheduler</div>
+      </div>
+      <div id="cal-no-data" style="text-align:center;padding:3rem;color:var(--muted);font-size:13px">
+        Generate Section 12 (30-day plan) first, then come back here to export it as a CSV.
+        <br><br>
+        <button class="btn btn-secondary" onclick="jumpToSection(0)">← Go to setup</button>
+      </div>
+      <div id="cal-ready" style="display:none">
+        <div style="display:flex;gap:8px;margin-bottom:1.25rem;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="downloadCalendarCSV()">⬇ Download CSV</button>
+          <button class="btn btn-secondary" onclick="copyCalendarCSV()">📋 Copy CSV</button>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Preview (first 7 days)</div>
+        <div class="cal-preview">
+          <div class="cal-row header">
+            <div class="cal-cell">Day</div>
+            <div class="cal-cell">TikTok</div>
+            <div class="cal-cell">Pinterest</div>
+            <div class="cal-cell">Email</div>
+            <div class="cal-cell">Blog</div>
+          </div>
+          <div id="cal-preview-rows"></div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:8px">Full 30-day CSV downloads with all columns. Import directly into Google Sheets or Notion.</div>
+      </div>
+    </div>
+
+    <!-- BOOK / DOC UPLOAD -->
+    <div id="page-bookupload" class="page" style="display:none">
+      <div class="page-header">
+        <div class="page-title">📖 Book / doc upload</div>
+        <div class="page-sub">Ground every AI output in your actual content — no more hallucinated facts</div>
+      </div>
+
+      <!-- HOW IT WORKS -->
+      <div class="card" style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.25rem">
+        <div style="font-size:13px;font-weight:600;margin-bottom:12px">How it works</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+            <div>
+              <div style="font-size:13px;font-weight:500">Convert your PDF to Markdown first</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px">Upload your book PDF to Claude or ChatGPT and ask: "Convert this entire document to markdown. Preserve all headings, chapter names, and content exactly. Output the full markdown only." Save the result as a <code style="background:var(--bg3);padding:1px 5px;border-radius:3px;font-size:11px">.md</code> or <code style="background:var(--bg3);padding:1px 5px;border-radius:3px;font-size:11px">.txt</code> file.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+            <div>
+              <div style="font-size:13px;font-weight:500">Upload the .md or .txt file here</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px">Drop it in the zone below. The tool reads it instantly — nothing is sent to any server. It stays in your browser session only.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--accent);color:white;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+            <div>
+              <div style="font-size:13px;font-weight:500">Every AI output is now grounded in your content</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px">Hook bank generation, repurpose transforms, platform optimizer — all will reference your actual chapter titles, laws, concepts, and language. No invented facts.</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start">
+            <div style="width:24px;height:24px;border-radius:50%;background:var(--bg3);color:var(--muted);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">⚠</div>
+            <div>
+              <div style="font-size:13px;font-weight:500;color:var(--muted)">Re-upload each session</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px">The file lives in memory only — it clears when you close or refresh the tab. Keep the .md file on your desktop for quick re-upload.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPLOAD ZONE -->
+      <div class="book-upload-zone" id="book-upload-zone" onclick="document.getElementById('book-file-input').click()" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+        <span class="book-upload-icon" id="book-upload-icon">📄</span>
+        <div class="book-upload-title" id="book-upload-title">Drop your .md or .txt file here</div>
+        <div class="book-upload-sub" id="book-upload-sub">or click to browse — accepts .md, .txt files only<br>Convert PDF to MD first using Claude or ChatGPT</div>
+        <input type="file" id="book-file-input" accept=".md,.txt" style="display:none" onchange="handleFileSelect(event)">
+      </div>
+
+      <div class="book-status empty" id="book-status">
+        <span id="book-status-icon">○</span>
+        <span id="book-status-text">No file loaded — outputs will generate without book context</span>
+      </div>
+
+      <div id="book-preview-wrap" style="display:none;margin-top:1.25rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em">Content preview (first 500 chars)</div>
+          <button class="btn-sm" onclick="clearBookContent()">🗑 Remove</button>
+        </div>
+        <div id="book-preview" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:12px;color:var(--muted);white-space:pre-wrap;line-height:1.6;max-height:150px;overflow-y:auto"></div>
+      </div>
+
+      <div id="book-gen-cta" style="display:none;margin-top:1.25rem;padding:1.25rem;background:var(--bg2);border:1px solid #14532d;border-radius:var(--radius)">
+        <div style="font-size:13px;font-weight:600;color:#4ade80;margin-bottom:6px">✅ Book loaded — ready to generate</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:1rem">Choose which sections to fire and HookBank will generate all of them grounded in your book content.</div>
+        <button class="btn btn-primary" onclick="openBulkGenModal()" style="font-size:13px">📖 Generate from book</button>
+      </div>
+    </div>
+
+  </main>
 </div>
 
-<div class="toast-container" id="toast-container"></div>
+<div class="toast" id="toast"></div>
 
-<!-- MODALS -->
-<div class="overlay" id="new-repo-modal" style="display:none" onclick="closeModal(event,'new-repo-modal')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h2>✦ Create New Repository</h2>
-    <div class="form-group"><label>Repository Name *</label><input type="text" id="nr-name" placeholder="my-project" /></div>
-    <div class="form-group"><label>Description</label><input type="text" id="nr-desc" placeholder="Optional" /></div>
-    <div class="form-group"><label>Local Folder Path *</label><input type="text" id="nr-path" placeholder="/Users/mollah/Desktop/my-project" /><div class="hint">Folder must exist on your Mac.</div></div>
-    <div class="form-group"><div class="toggle-row"><label>Private Repository</label><label class="toggle"><input type="checkbox" id="nr-private" checked /><span class="toggle-slider"></span></label></div></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="document.getElementById('new-repo-modal').style.display='none'">Cancel</button>
-      <button class="btn btn-green" id="nr-submit" onclick="createRepo()">Create Repository</button>
+<script>
+const SECTION_NAMES = {
+  1:'Core hook points', 2:'Hook bank (50)', 3:'Video hooks',
+  4:'Pinterest hooks', 5:'Blog hooks', 6:'Email hooks',
+  7:'Lead magnets', 8:'Social content (100)',
+  9:'Sales page', 10:'Monetization', 11:'Virality scores', 12:'30-day plan',
+  13:'Voiceover scripts'
+};
+
+const SECTION_PROMPTS = {
+  1: `SECTION 1 — CORE HOOK POINT
+
+Analyze the offer, identify: target audience, pain points, frustrations, desires, goals, objections, dreams, emotional triggers.
+
+Then create exactly:
+• ONE primary Hook Point (the single most powerful positioning statement)
+• THREE alternative Hook Points
+• THREE contrarian Hook Points (challenge conventional wisdom)
+• THREE curiosity Hook Points (create irresistible intrigue)
+• THREE authority Hook Points (establish credibility instantly)
+• THREE urgency Hook Points (create immediate action)
+
+Format clearly with headers for each group. Be specific to the offer — no generic marketing speak.`,
+
+  2: `SECTION 2 — HOOK BANK: 50 SHORT-FORM HOOKS
+
+Create exactly 50 hooks, 5 per category, labeled clearly:
+
+CURIOSITY HOOKS (5)
+SHOCK HOOKS (5)
+CONTRARIAN HOOKS (5)
+MISTAKE HOOKS (5)
+HOW-TO HOOKS (5)
+STORY HOOKS (5)
+FEAR HOOKS (5)
+ASPIRATION HOOKS (5)
+IDENTITY HOOKS (5)
+SECRET HOOKS (5)
+
+Every hook must be stop-scroll worthy, punchy, and specific to this offer. No filler. No generic hooks.`,
+
+  3: `SECTION 3 — VIDEO HOOKS (90 total)
+
+Create hooks that grab attention in under 3 seconds.
+
+TIKTOK OPENING HOOKS (30)
+Number each. Start with action/conflict/shock. Written as spoken word.
+
+INSTAGRAM REEL OPENING HOOKS (30)
+Number each. Visual and aspirational. Strong pattern interrupts.
+
+YOUTUBE SHORTS OPENING HOOKS (30)
+Number each. Promise immediate value. Create curiosity loops.`,
+
+  4: `SECTION 4 — PINTEREST HOOKS (150 total)
+
+SEO-optimize all. Include keywords people actually search on Pinterest.
+
+PINTEREST TITLES (50)
+Number each. Under 100 characters. Keyword-rich. Clickable.
+
+PINTEREST TEXT OVERLAYS (50)
+Number each. Under 10 words. Bold statement that stops the scroll.
+
+PINTEREST DESCRIPTIONS (50)
+Number each. 2-3 sentences. Include primary keyword, secondary keyword, and call to action. SEO-optimized.`,
+
+  5: `SECTION 5 — BLOG HOOKS (150 total)
+
+BLOG POST TITLES (30)
+Number each. SEO-optimized. Curiosity + keyword.
+
+ARTICLE HEADLINES (30)
+Number each. Journalistic style. Newsworthy angle.
+
+LISTICLE IDEAS (30)
+Number each. "X ways/things/reasons/mistakes..." format.
+
+COMPARISON ARTICLES (30)
+Number each. "X vs Y" format. High search intent.
+
+PROBLEM-SOLUTION ARTICLES (30)
+Number each. Lead with the problem. Promise the solution.`,
+
+  6: `SECTION 6 — EMAIL HOOKS (60 total)
+
+CURIOSITY-BASED SUBJECT LINES (25)
+Number each. Open loops. Pattern interrupts. Intrigue.
+
+URGENCY-BASED SUBJECT LINES (25)
+Number each. Deadlines. Scarcity. Loss aversion. FOMO.
+
+EMAIL SEQUENCE IDEAS (10)
+Number each. Name the sequence + 5-7 email titles in the sequence + goal of the sequence.`,
+
+  7: `SECTION 7 — LEAD MAGNETS (100 total)
+
+FREEBIE IDEAS (20)
+Number each. Specific, desirable, instantly valuable.
+
+CHECKLIST IDEAS (20)
+Number each. Actionable, completable, specific to the niche.
+
+TEMPLATE IDEAS (20)
+Number each. Ready-to-use, time-saving, professional.
+
+CHEAT SHEET IDEAS (20)
+Number each. Quick-reference, visual, practical.
+
+MINI-GUIDE IDEAS (20)
+Number each. 5-10 page depth, focused on one specific problem.`,
+
+  8: `SECTION 8 — SOCIAL CONTENT IDEAS (100 total)
+
+EDUCATION (12): Teach something valuable about the niche.
+ENTERTAINMENT (12): Relatable, funny, or surprising content.
+INSPIRATION (12): Motivational angles tied to the transformation.
+AUTHORITY (12): Proof-based, data-driven, expert positioning.
+CASE STUDY (13): Real results, before/after, transformation stories.
+MYTH BUSTING (13): Challenge common misconceptions in the niche.
+FAQ (13): Answer real questions your audience Googles.
+STORYTELLING (13): Narrative content that builds connection.
+
+For each idea: give the format (Reel, Carousel, Thread, etc.) + a one-sentence description.`,
+
+  9: `SECTION 9 — SALES PAGE COPY
+
+HEADLINE:
+Write the single most powerful headline for this offer.
+
+SUBHEADLINE:
+A supporting sentence that deepens the hook.
+
+10 BENEFITS (with emotional framing):
+Number each. Feature → Benefit → Emotion. Show the transformation.
+
+10 OBJECTIONS + FULL OBJECTION HANDLING:
+Number each objection. Write 2-3 sentences of handling that neutralizes it completely.
+
+5 CTA VARIATIONS:
+Write 5 different call-to-action button texts with supporting micro-copy.`,
+
+  10: `SECTION 10 — MONETIZATION MAP
+
+For each item, provide:
+- Name and description
+- Ease of creation (1-10)
+- Revenue potential (1-10)
+- Speed to market (1-10)
+- Total score (sum)
+
+Cover ALL of these categories:
+DIGITAL PRODUCTS (5 ideas)
+COURSES (3 ideas)
+MEMBERSHIP IDEAS (3 ideas)
+SAAS OPPORTUNITIES (3 ideas)
+AFFILIATE OPPORTUNITIES (5 ideas)
+UPSELLS (3 ideas)
+DOWNSELLS (3 ideas)
+
+Sort each category by total score, highest first.`,
+
+  11: `SECTION 11 — VIRALITY SCORES
+
+Take the 20 most powerful hooks from ALL previous sections.
+
+For each hook, score on:
+• Curiosity (1-10)
+• Emotional impact (1-10)
+• Shareability (1-10)
+• Clickability (1-10)
+• Conversion potential (1-10)
+• TOTAL (out of 50)
+
+Format as a ranked table, highest total first.
+Mark the TOP 10 most likely to go viral with ⭐
+
+Include a "Why it works" note for each top-10 hook.`,
+
+  12: `SECTION 12 — 30-DAY CONTENT CALENDAR
+
+Create a complete daily content plan for 30 days.
+
+For EACH day (Day 1 through Day 30), provide:
+📱 TIKTOK: [specific video idea — topic, hook, format]
+📌 PINTEREST: [specific pin idea — product, overlay text, board]
+✉️ EMAIL: [subject line + one-sentence content summary]
+📝 BLOG: [specific article title + target keyword]
+
+Theme the weeks:
+Week 1: Awareness (introduce, educate, attract)
+Week 2: Engagement (build trust, share proof, entertain)
+Week 3: Conversion (sell, overcome objections, urgency)
+Week 4: Retention (loyalty, repeat clicks, referrals)
+
+Focus on building an audience AND generating affiliate sales simultaneously.`,
+
+  13: `SECTION 13 — VOICEOVER SCRIPTS
+
+YOU MUST WRITE EXACTLY 30 COMPLETE SCRIPTS. DO NOT STOP EARLY. DO NOT SUMMARIZE. WRITE EVERY SINGLE SCRIPT IN FULL.
+
+10 TIKTOK SCRIPTS + 10 INSTAGRAM REEL SCRIPTS + 10 YOUTUBE SHORTS SCRIPTS = 30 TOTAL.
+
+Write complete, ready-to-record voiceover scripts. Natural when spoken aloud — conversational, punchy, no corporate speak.
+
+---
+
+TIKTOK VOICEOVER SCRIPTS — SCRIPTS 1 THROUGH 10 (30-45 seconds each)
+
+For each script use this exact format:
+SCRIPT [number]
+HOOK: [opening line, spoken with energy]
+BODY: [main content in short punchy sentences]
+CTA: [clear call to action]
+DELIVERY: [tone, pace, energy level]
+
+Write all 10 TikTok scripts before moving on.
+
+---
+
+INSTAGRAM REEL VOICEOVER SCRIPTS — SCRIPTS 11 THROUGH 20 (15-30 seconds each)
+
+For each script use this exact format:
+SCRIPT [number]
+HOOK: [pattern interrupt opening]
+BODY: [tight visual storytelling]
+CTA: [one clear action]
+DELIVERY: [tone, pace, energy level]
+
+Write all 10 Reel scripts before moving on.
+
+---
+
+YOUTUBE SHORTS VOICEOVER SCRIPTS — SCRIPTS 21 THROUGH 30 (45-60 seconds each)
+
+For each script use this exact format:
+SCRIPT [number]
+HOOK: [bold claim or question]
+BODY: [value-packed content with clear narrative arc]
+CTA: [subscribe prompt plus action]
+DELIVERY: [tone, pace, energy level]
+
+Write all 10 YouTube Shorts scripts.
+
+---
+
+RULES:
+- Number scripts 1 through 30 sequentially across all three platforms
+- Every script must be complete — no placeholders, no "repeat above format"
+- Vary angles across all 30: educational, story-based, shocking, aspirational, fear, curiosity
+- All scripts specific to the offer — no generic content
+- Plain text only, no markdown`
+};
+
+let allOutputs = {};
+let selectedSections = new Set(['1','2','3','4','5','6','7','8','9','10','11','12','13']);
+let currentTabId = null;
+let bookContent = ''; // grounding context from uploaded file
+
+function saveKey(val) {
+  try { localStorage.setItem('hookbank_apikey', val); } catch(e) {}
+  updateKeyStatus(val);
+}
+
+function loadKey() {
+  try { return localStorage.getItem('hookbank_apikey') || ''; } catch(e) { return ''; }
+}
+
+function saveModel(val) {
+  try { localStorage.setItem('hookbank_model', val); } catch(e) {}
+}
+
+function loadModel() {
+  try { return localStorage.getItem('hookbank_model') || ''; } catch(e) { return ''; }
+}
+
+function updateKeyStatus(key) {
+  const el = document.getElementById('key-status');
+  const txt = document.getElementById('key-status-text');
+  if (!el || !txt) return;
+  if (key && key.length > 10) {
+    el.className = 'key-status saved';
+    const masked = key.slice(0, 8) + '••••••••' + key.slice(-4);
+    txt.textContent = 'Key saved — ' + masked;
+  } else {
+    el.className = 'key-status missing';
+    txt.textContent = 'No API key — enter key above';
+  }
+}
+
+window.addEventListener('load', () => {
+  const k = loadKey();
+  if (k) document.getElementById('api-key').value = k;
+  updateKeyStatus(k);
+
+  const m = loadModel();
+  const sel = document.getElementById('model-select');
+  if (m && sel) {
+    const opt = [...sel.options].find(o => o.value === m);
+    if (opt) sel.value = m;
+  }
+});
+
+function togglePick(el) {
+  const id = el.dataset.id;
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) selectedSections.add(id);
+  else selectedSections.delete(id);
+}
+
+function selectAll() {
+  document.querySelectorAll('.pick-btn').forEach(b => { b.classList.add('selected'); selectedSections.add(b.dataset.id); });
+}
+
+function deselectAll() {
+  document.querySelectorAll('.pick-btn').forEach(b => { b.classList.remove('selected'); selectedSections.delete(b.dataset.id); });
+}
+
+function showToast(msg, dur=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+async function callLLM(systemPrompt, userMsg) {
+  const key = document.getElementById('api-key').value.trim();
+  const model = document.getElementById('model-select').value;
+  if (!key) throw new Error('No API key');
+
+  const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${key}`,
+      'HTTP-Referer': 'https://hookbank.ai',
+      'X-Title': 'HookBank Generator'
+    },
+    body: JSON.stringify({
+      model,
+      max_tokens: 4000,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userMsg }
+      ]
+    })
+  });
+
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error(`API error ${resp.status}: ${err}`);
+  }
+
+  const data = await resp.json();
+  return data.choices?.[0]?.message?.content || '';
+}
+
+async function runAll() {
+  const offer = document.getElementById('offer-input').value.trim();
+  if (!offer) { showToast('⚠ Paste your offer first'); return; }
+
+  const key = document.getElementById('api-key').value.trim();
+  if (!key) { showToast('⚠ Add your OpenRouter API key'); return; }
+
+  const toGen = [...selectedSections].map(Number).filter(n => SECTION_PROMPTS[n]).sort((a,b)=>a-b);
+  if (!toGen.length) { showToast('⚠ Select at least one section'); return; }
+
+  document.getElementById('run-btn').disabled = true;
+  document.getElementById('run-btn').textContent = '⏳ Generating...';
+  document.getElementById('progress-wrap').style.display = 'block';
+  document.getElementById('empty-state').style.display = 'none';
+
+  allOutputs = {};
+  showResults();
+
+  const bookContext = bookContent ? `\n\nSOURCE DOCUMENT — GROUND ALL OUTPUT IN THIS CONTENT ONLY:\nDo NOT invent chapter names, laws, principles, concepts, or quotes not present in this document. Use only what is written below.\n\n${bookContent.slice(0, 12000)}\n\nEND OF SOURCE DOCUMENT` : '';
+
+  const systemPrompt = `You are a world-class marketing expert — a fusion of Brendan Kane (viral content), David Ogilvy (advertising mastery), Gary Halbert (direct response), and Eugene Schwartz (copywriting psychology).
+
+THE OFFER:
+${offer}${bookContext}
+
+Before writing, mentally analyze:
+• Target audience (who exactly, demographics, psychographics)
+• Pain points (what keeps them up at night)
+• Frustrations (what have they already tried that failed)
+• Desires (what do they secretly want)
+• Goals (what transformation are they seeking)
+• Objections (why they might not buy)
+• Dreams (the ideal outcome)
+• Emotional triggers (what makes them act)
+
+Then produce the requested section with maximum specificity, creativity, and commercial power. Be brutally specific to THIS offer. No generic marketing templates. Output only the section content — no preamble, no meta-commentary.
+
+CRITICAL FORMATTING RULE: Use plain text only. No markdown. No # headers, no ## headers, no ### headers, no *italics*, no **bold**, no __ underlines. Use CAPS for section headers and labels instead. Use plain dashes --- for dividers.`;
+
+  for (let i = 0; i < toGen.length; i++) {
+    const id = toGen[i];
+    const pct = Math.round((i / toGen.length) * 100);
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-text').textContent = `Generating section ${i+1} of ${toGen.length}: ${SECTION_NAMES[id]}...`;
+
+    setNavState(id, 'generating');
+    updateTabLoading(id, true);
+
+    try {
+      const result = await callLLM(systemPrompt, SECTION_PROMPTS[id]);
+      allOutputs[id] = result;
+      setNavState(id, 'done');
+      updateTabContent(id, result);
+    } catch(e) {
+      allOutputs[id] = `Error: ${e.message}\n\nPlease check your API key and try again.`;
+      setNavState(id, '');
+      updateTabContent(id, allOutputs[id]);
+    }
+  }
+
+  document.getElementById('progress-fill').style.width = '100%';
+  document.getElementById('progress-text').textContent = `✓ All ${toGen.length} sections complete`;
+  setTimeout(() => { document.getElementById('progress-wrap').style.display = 'none'; }, 2000);
+
+  // Force-clear any stuck generating states
+  toGen.forEach(id => {
+    const el = document.getElementById('nav-'+id);
+    if (el && el.classList.contains('generating')) {
+      el.className = 'nav-item done';
+    }
+  });
+
+  document.getElementById('run-btn').disabled = false;
+  document.getElementById('run-btn').textContent = '⚡ Regenerate';
+  addSaveButtons();
+  showToast('✓ Hook Bank complete!');
+}
+
+function setNavState(id, state) {
+  const el = document.getElementById('nav-'+id);
+  if (!el) return;
+  el.className = 'nav-item' + (state ? ' '+state : '');
+}
+
+function showResults() {
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.getElementById('page-results').style.display = 'block';
+  const tabsEl = document.getElementById('output-tabs');
+  if (!tabsEl.hasChildNodes()) buildTabsIfNeeded();
+}
+
+function showSetup() {
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.getElementById('page-0').style.display = 'block';
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('nav-0').classList.add('active');
+}
+
+function buildTabsIfNeeded() {
+  const tabsEl = document.getElementById('output-tabs');
+  const sectionsEl = document.getElementById('output-sections');
+  tabsEl.innerHTML = '';
+  sectionsEl.innerHTML = '';
+
+  const toGen = [...selectedSections].map(Number).filter(n => SECTION_PROMPTS[n]).sort((a,b)=>a-b);
+
+  toGen.forEach((id, i) => {
+    const tab = document.createElement('div');
+    tab.className = 'tab' + (i === 0 ? ' active' : '');
+    tab.id = 'tab-'+id;
+    tab.textContent = SECTION_NAMES[id];
+    tab.onclick = () => switchTab(id);
+    tabsEl.appendChild(tab);
+
+    const sec = document.createElement('div');
+    sec.className = 'section-block' + (i === 0 ? ' active' : '');
+    sec.id = 'sec-'+id;
+    sec.innerHTML = `
+      <div class="out-content loading" id="out-${id}">Generating ${SECTION_NAMES[id]}...</div>
+      <div class="action-row">
+        <button class="btn-sm" onclick="copySection(${id})">📋 Copy</button>
+        <button class="btn-sm" onclick="downloadSection(${id})">⬇ Download</button>
+      </div>`;
+    sectionsEl.appendChild(sec);
+    if (i === 0) currentTabId = id;
+  });
+
+  updateResultsHeader();
+}
+
+function updateResultsHeader() {
+  const offer = document.getElementById('offer-input').value.trim();
+  const preview = offer.length > 80 ? offer.slice(0,80)+'...' : offer;
+  document.getElementById('results-title').textContent = 'Hook Bank';
+  document.getElementById('results-sub').textContent = preview || 'Generated results';
+}
+
+function updateTabLoading(id, loading) {
+  const el = document.getElementById('out-'+id);
+  if (!el) return;
+  if (loading) { el.className = 'out-content loading'; el.textContent = `Generating ${SECTION_NAMES[id]}...`; }
+}
+
+function updateTabContent(id, content) {
+  const el = document.getElementById('out-'+id);
+  if (!el) return;
+  el.className = 'out-content';
+  el.textContent = content;
+}
+
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.section-block').forEach(s => s.classList.remove('active'));
+  const tab = document.getElementById('tab-'+id);
+  const sec = document.getElementById('sec-'+id);
+  if (tab) tab.classList.add('active');
+  if (sec) sec.classList.add('active');
+  currentTabId = id;
+}
+
+function jumpToSection(id) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('nav-'+id).classList.add('active');
+
+  if (id === 0) { showSetup(); return; }
+
+  // If results are showing, just switch tab — never hide them
+  const resultsVisible = document.getElementById('page-results').style.display !== 'none';
+  if (resultsVisible) {
+    const tab = document.getElementById('tab-'+id);
+    if (tab) { switchTab(id); return; }
+  }
+
+  if (Object.keys(allOutputs).length === 0) { showSetup(); return; }
+  showResults();
+  switchTab(id);
+}
+
+function copySection(id) {
+  const content = allOutputs[id] || '';
+  if (!content) { showToast('Nothing to copy yet'); return; }
+  navigator.clipboard.writeText(`=== ${SECTION_NAMES[id].toUpperCase()} ===\n\n${content}`)
+    .then(() => showToast('✓ Copied!'))
+    .catch(() => { prompt('Copy this:', content); });
+}
+
+function copyCurrentSection() {
+  if (currentTabId) copySection(currentTabId);
+}
+
+function downloadSection(id) {
+  const content = allOutputs[id] || '';
+  if (!content) { showToast('Nothing to download yet'); return; }
+  const blob = new Blob([`HOOK BANK — ${SECTION_NAMES[id].toUpperCase()}\n${'='.repeat(50)}\n\n${content}`], { type:'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `hookbank-section-${id}-${SECTION_NAMES[id].replace(/\s+/g,'-').toLowerCase()}.txt`;
+  a.click();
+}
+
+function exportAll() {
+  if (!Object.keys(allOutputs).length) { showToast('Generate sections first'); return; }
+  const offer = document.getElementById('offer-input').value.trim();
+  let full = `HOOK BANK — COMPLETE EXPORT\n${'='.repeat(60)}\n\nOFFER:\n${offer}\n\nGenerated: ${new Date().toLocaleString()}\n\n${'='.repeat(60)}\n\n`;
+  Object.entries(allOutputs).sort((a,b)=>+a[0]-+b[0]).forEach(([id, content]) => {
+    full += `\n\n${'='.repeat(60)}\nSECTION ${id}: ${SECTION_NAMES[id].toUpperCase()}\n${'='.repeat(60)}\n\n${content}\n`;
+  });
+  const blob = new Blob([full], { type:'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `hookbank-complete-${Date.now()}.txt`;
+  a.click();
+  showToast('✓ Exported!');
+}
+
+// ─── TOOL NAVIGATION ────────────────────────────────────────────────
+
+function openTool(tool) {
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-'+tool).style.display = 'block';
+  const navEl = document.getElementById('nav-'+tool);
+  if (navEl) navEl.classList.add('active');
+  if (tool === 'library') renderLibrary();
+  if (tool === 'history') renderHistory();
+  if (tool === 'calendar') renderCalendarPreview();
+}
+
+// ─── BOOK UPLOAD ─────────────────────────────────────────────────────
+
+function handleDragOver(e) {
+  e.preventDefault();
+  document.getElementById('book-upload-zone').classList.add('dragover');
+}
+
+function handleDragLeave(e) {
+  document.getElementById('book-upload-zone').classList.remove('dragover');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('book-upload-zone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) processBookFile(file);
+}
+
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) processBookFile(file);
+}
+
+function processBookFile(file) {
+  const allowed = ['.md', '.txt'];
+  const ext = '.' + file.name.split('.').pop().toLowerCase();
+  if (!allowed.includes(ext)) {
+    showToast('⚠ Only .md and .txt files supported');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    bookContent = e.target.result;
+    const wordCount = bookContent.split(/\s+/).filter(Boolean).length;
+    const charCount = bookContent.length;
+
+    // Update upload zone
+    const zone = document.getElementById('book-upload-zone');
+    zone.classList.add('loaded');
+    document.getElementById('book-upload-icon').textContent = '✅';
+    document.getElementById('book-upload-title').textContent = file.name + ' loaded';
+    document.getElementById('book-upload-sub').textContent = `${wordCount.toLocaleString()} words · ${(charCount/1000).toFixed(1)}k characters · Click to replace`;
+
+    // Update status
+    const status = document.getElementById('book-status');
+    status.className = 'book-status loaded';
+    document.getElementById('book-status-icon').textContent = '●';
+    document.getElementById('book-status-text').textContent = `Book loaded — all AI outputs now grounded in "${file.name}"`;
+
+    // Show preview
+    document.getElementById('book-preview-wrap').style.display = 'block';
+    document.getElementById('book-preview').textContent = bookContent.slice(0, 500) + (bookContent.length > 500 ? '...' : '');
+
+    // Update sidebar indicator
+    updateBookIndicator(file.name, wordCount);
+    // Enable generate from book button
+    const sidebarBtn = document.getElementById('sidebar-gen-book-btn');
+    if (sidebarBtn) { sidebarBtn.disabled = false; sidebarBtn.title = ''; }
+    document.getElementById('book-gen-cta').style.display = 'block';
+    showToast('✓ Book loaded — ' + wordCount.toLocaleString() + ' words');
+  };
+  reader.readAsText(file);
+}
+
+function clearBookContent() {
+  bookContent = '';
+  document.getElementById('book-upload-zone').classList.remove('loaded');
+  document.getElementById('book-upload-icon').textContent = '📄';
+  document.getElementById('book-upload-title').textContent = 'Drop your .md or .txt file here';
+  document.getElementById('book-upload-sub').textContent = 'or click to browse — accepts .md, .txt files only\nConvert PDF to MD first using Claude or ChatGPT';
+  document.getElementById('book-status').className = 'book-status empty';
+  document.getElementById('book-status-icon').textContent = '○';
+  document.getElementById('book-status-text').textContent = 'No file loaded — outputs will generate without book context';
+  document.getElementById('book-preview-wrap').style.display = 'none';
+  document.getElementById('book-file-input').value = '';
+  updateBookIndicator(null, 0);
+  const sidebarBtn = document.getElementById('sidebar-gen-book-btn');
+  if (sidebarBtn) { sidebarBtn.disabled = true; sidebarBtn.title = 'Upload a book first'; }
+  document.getElementById('book-gen-cta').style.display = 'none';
+  showToast('Book content cleared');
+}
+
+function updateBookIndicator(filename, wordCount) {
+  const ind = document.getElementById('book-indicator-sidebar');
+  const txt = document.getElementById('book-indicator-text');
+  if (!ind || !txt) return;
+  if (filename) {
+    ind.className = 'book-indicator loaded';
+    txt.textContent = '📖 ' + filename.replace(/\.(md|txt)$/i,'') + ' (' + wordCount.toLocaleString() + ' words)';
+  } else {
+    ind.className = 'book-indicator empty';
+    txt.textContent = 'No book loaded';
+  }
+}
+
+function copyEl(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const text = el.textContent || el.innerText;
+  navigator.clipboard.writeText(text).then(() => showToast('✓ Copied!')).catch(() => { prompt('Copy:', text); });
+}
+
+// ─── 1. SAVED HOOKS LIBRARY ─────────────────────────────────────────
+
+function loadLibrary() {
+  try { return JSON.parse(localStorage.getItem('hookbank_library') || '[]'); } catch(e) { return []; }
+}
+
+function saveLibraryData(data) {
+  try { localStorage.setItem('hookbank_library', JSON.stringify(data)); } catch(e) {}
+}
+
+function saveToLibrary(text, source, tag) {
+  if (!text || text.length < 5) { showToast('Nothing to save'); return; }
+  const lib = loadLibrary();
+  lib.unshift({ id: Date.now(), text: text.trim(), source, tag, date: new Date().toLocaleDateString() });
+  saveLibraryData(lib);
+  showToast('💾 Saved to library!');
+  if (document.getElementById('page-library').style.display !== 'none') renderLibrary();
+}
+
+let libFilter = 'all';
+
+function filterLibrary(btn, tag) {
+  document.querySelectorAll('.lib-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  libFilter = tag;
+  renderLibrary();
+}
+
+function renderLibrary() {
+  const lib = loadLibrary();
+  const el = document.getElementById('library-list');
+  const filtered = libFilter === 'all' ? lib : lib.filter(i => i.tag === libFilter);
+  if (!filtered.length) {
+    el.innerHTML = '<div class="lib-empty">No saved hooks yet.<br>Click 💾 Save on any output to add it here.</div>';
+    return;
+  }
+  el.innerHTML = filtered.map(item => `
+    <div class="library-item" id="libitem-${item.id}">
+      <div style="flex:1">
+        <div class="library-item-text" onclick="navigator.clipboard.writeText('${item.text.replace(/'/g,"\\'")}').then(()=>showToast('✓ Copied!'))">${item.text.length > 200 ? item.text.slice(0,200)+'...' : item.text}</div>
+        <div class="library-item-meta"><span class="lib-tag ${item.tag}">${item.tag}</span> ${item.source} &bull; ${item.date}</div>
+      </div>
+      <div class="library-item-actions">
+        <button class="btn-sm" onclick="navigator.clipboard.writeText(loadLibrary().find(i=>i.id===${item.id})?.text||'').then(()=>showToast('✓ Copied!'))">📋</button>
+        <button class="btn-sm" onclick="deleteLibraryItem(${item.id})">🗑</button>
+      </div>
+    </div>`).join('');
+}
+
+function deleteLibraryItem(id) {
+  const lib = loadLibrary().filter(i => i.id !== id);
+  saveLibraryData(lib);
+  renderLibrary();
+}
+
+function clearLibrary() {
+  if (!confirm('Clear all saved hooks?')) return;
+  saveLibraryData([]);
+  renderLibrary();
+}
+
+function exportLibrary() {
+  const lib = loadLibrary();
+  if (!lib.length) { showToast('Nothing to export'); return; }
+  const text = lib.map(i => `[${i.tag.toUpperCase()}] ${i.source} — ${i.date}\n${i.text}`).join('\n\n---\n\n');
+  const blob = new Blob([text], { type:'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `hookbank-saved-${Date.now()}.txt`;
+  a.click();
+}
+
+// Add save buttons to action rows
+function addSaveButtons() {
+  const toGen = [...selectedSections].map(Number).filter(n => SECTION_PROMPTS[n]).sort((a,b)=>a-b);
+  toGen.forEach(id => {
+    const row = document.querySelector(`#sec-${id} .action-row`);
+    if (row && !row.querySelector('.save-hook-btn')) {
+      const btn = document.createElement('button');
+      btn.className = 'save-hook-btn';
+      btn.innerHTML = '💾 Save';
+      btn.onclick = () => {
+        const content = allOutputs[id] || '';
+        const tag = [4,8].includes(id) ? 'pinterest' : [3,13].includes(id) ? 'tiktok' : [6].includes(id) ? 'email' : 'hook';
+        saveToLibrary(content, SECTION_NAMES[id], tag);
+      };
+      row.appendChild(btn);
+    }
+  });
+}
+
+// ─── 2. OFFER HISTORY ───────────────────────────────────────────────
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem('hookbank_history') || '[]'); } catch(e) { return []; }
+}
+
+function saveHistoryData(data) {
+  try { localStorage.setItem('hookbank_history', JSON.stringify(data)); } catch(e) {}
+}
+
+function saveCurrentOffer() {
+  const offer = document.getElementById('offer-input').value.trim();
+  if (!offer) { showToast('⚠ No offer in setup box'); return; }
+  const name = offer.slice(0, 60).split(' ').slice(0, 6).join(' ') + (offer.length > 60 ? '...' : '');
+  const hist = loadHistory();
+  hist.unshift({ id: Date.now(), name, offer, date: new Date().toLocaleDateString() });
+  saveHistoryData(hist.slice(0, 20)); // keep last 20
+  showToast('💾 Offer saved!');
+  renderHistory();
+}
+
+function renderHistory() {
+  const hist = loadHistory();
+  const el = document.getElementById('history-list');
+  if (!hist.length) {
+    el.innerHTML = '<div class="lib-empty">No saved offers yet.<br>Click "Save current offer" above.</div>';
+    return;
+  }
+  el.innerHTML = hist.map(item => `
+    <div class="history-item">
+      <div style="flex:1" onclick="loadOffer(${item.id})">
+        <div class="history-item-name">${item.name}</div>
+        <div class="history-item-meta">${item.date}</div>
+      </div>
+      <button class="history-item-del" onclick="deleteHistory(${item.id})">✕</button>
+    </div>`).join('');
+}
+
+function loadOffer(id) {
+  const hist = loadHistory();
+  const item = hist.find(i => i.id === id);
+  if (!item) return;
+  document.getElementById('offer-input').value = item.offer;
+  showSetup();
+  showToast('✓ Offer loaded — ready to generate');
+}
+
+function deleteHistory(id) {
+  saveHistoryData(loadHistory().filter(i => i.id !== id));
+  renderHistory();
+}
+
+// ─── 5. PLATFORM OPTIMIZER ──────────────────────────────────────────
+
+let activePlatform = 'pinterest';
+
+const PLATFORM_PROMPTS = {
+  pinterest: `You are a Pinterest SEO expert. Optimize the following content specifically for Pinterest search and the Pinterest algorithm. Apply these rules: include 2-3 high-volume Pinterest keywords naturally, add seasonal/trend relevance if applicable, make the first sentence keyword-rich for SEO, include a soft call to action, keep it under 500 characters for description or 100 characters for title. Output the optimized version only, plain text.`,
+  tiktok: `You are a TikTok content strategist. Optimize the following content for maximum TikTok engagement and algorithmic reach. Apply these rules: front-load the hook in the first 3 words, use conversational Gen-Z adjacent language, create a curiosity gap or pattern interrupt, add urgency or FOMO where natural, keep energy high throughout. Output the optimized version only, plain text.`,
+  instagram: `You are an Instagram Reels expert. Optimize the following content for Instagram Reels engagement. Apply these rules: aspirational and visual language, strong emotional hook, lifestyle-focused framing, clear transformation implied, ends with engagement prompt. Output the optimized version only, plain text.`,
+  youtube: `You are a YouTube Shorts strategist. Optimize the following content for YouTube Shorts retention and CTR. Apply these rules: bold claim or question that creates a loop, promise of value delivery in under 60 seconds, keyword-rich for YouTube search, creates reason to watch to the end. Output the optimized version only, plain text.`,
+  email: `You are an email deliverability and open-rate expert. Optimize the following for maximum email open rates and deliverability. Apply these rules: avoid spam trigger words (free, guaranteed, click here, !!!), keep subject under 50 characters, use curiosity gap or personal framing, lowercase feels more personal, add a preheader suggestion. Output the optimized subject line and a preheader suggestion, plain text.`,
+  twitter: `You are a viral X/Twitter strategist. Optimize the following for maximum engagement on X/Twitter. Apply these rules: under 280 characters, strong opinion or contrarian angle, creates replies and quote-tweets, no hashtags unless truly necessary, punchy and direct. Output the optimized tweet only, plain text.`
+};
+
+function selectPlatform(btn) {
+  document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  activePlatform = btn.dataset.platform;
+}
+
+async function runOptimizer() {
+  const input = document.getElementById('optimizer-input').value.trim();
+  if (!input) { showToast('⚠ Paste content to optimize'); return; }
+  const key = document.getElementById('api-key').value.trim();
+  if (!key) { showToast('⚠ Add your OpenRouter API key'); return; }
+
+  const out = document.getElementById('optimizer-result');
+  const wrap = document.getElementById('optimizer-output');
+  wrap.style.display = 'block';
+  out.className = 'out-content loading';
+  out.textContent = 'Optimizing for ' + activePlatform + '...';
+
+  try {
+    const result = await callLLM(PLATFORM_PROMPTS[activePlatform], input);
+    out.className = 'out-content';
+    out.textContent = result;
+  } catch(e) {
+    out.className = 'out-content';
+    out.textContent = 'Error: ' + e.message;
+  }
+}
+
+// ─── 6. BULK PIN GENERATOR ──────────────────────────────────────────
+
+const BULK_TYPE_PROMPTS = {
+  'pin-desc':      'Write a Pinterest description for this product. 2-3 sentences, SEO-optimized with keywords, ends with a call to action. Plain text only.',
+  'pin-title':     'Write a Pinterest title for this product. Under 100 characters, keyword-rich, curiosity-driven. Plain text only.',
+  'pin-overlay':   'Write Pinterest image overlay text for this product. Maximum 8 bold words that stop the scroll. Plain text only.',
+  'tiktok-hook':   'Write a TikTok opening hook for this product. 1-2 sentences, under 3 seconds spoken, creates instant curiosity. Plain text only.',
+  'email-subject': 'Write 3 email subject lines for this product. Mix curiosity and urgency styles. Number each. Plain text only.'
+};
+
+async function runBulk() {
+  const input = document.getElementById('bulk-input').value.trim();
+  if (!input) { showToast('⚠ Add product names first'); return; }
+  const key = document.getElementById('api-key').value.trim();
+  if (!key) { showToast('⚠ Add your OpenRouter API key'); return; }
+
+  const products = input.split('\n').map(p => p.trim()).filter(Boolean).slice(0, 20);
+  const type = document.getElementById('bulk-type').value;
+  const typePrompt = BULK_TYPE_PROMPTS[type];
+  const offer = document.getElementById('offer-input').value.trim();
+  const context = offer ? `Context — this is for: ${offer.slice(0,200)}` : '';
+
+  const resultsEl = document.getElementById('bulk-results');
+  const wrapEl = document.getElementById('bulk-output');
+  wrapEl.style.display = 'block';
+  resultsEl.innerHTML = products.map(p => `
+    <div class="bulk-result-item" id="bulk-${p.replace(/\s+/g,'_').slice(0,20)}">
+      <div class="bulk-result-product">${p}</div>
+      <div class="bulk-result-text" style="color:var(--muted);font-style:italic">Generating...</div>
+    </div>`).join('');
+
+  for (const product of products) {
+    const elId = 'bulk-'+product.replace(/\s+/g,'_').slice(0,20);
+    const textEl = document.querySelector(`#${elId} .bulk-result-text`);
+    try {
+      const result = await callLLM(
+        `You are a world-class copywriter. ${context}`,
+        `${typePrompt}\n\nPRODUCT: ${product}`
+      );
+      if (textEl) { textEl.style.color = ''; textEl.style.fontStyle = ''; textEl.textContent = result; }
+    } catch(e) {
+      if (textEl) { textEl.textContent = 'Error: ' + e.message; }
+    }
+  }
+  showToast(`✓ ${products.length} products done`);
+}
+
+function downloadBulk() {
+  const items = document.querySelectorAll('.bulk-result-item');
+  if (!items.length) return;
+  let text = 'BULK PIN GENERATOR EXPORT\n' + '='.repeat(40) + '\n\n';
+  items.forEach(item => {
+    const product = item.querySelector('.bulk-result-product').textContent;
+    const content = item.querySelector('.bulk-result-text').textContent;
+    text += `PRODUCT: ${product}\n${content}\n\n---\n\n`;
+  });
+  const blob = new Blob([text], { type:'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `bulk-pins-${Date.now()}.txt`;
+  a.click();
+}
+
+// ─── 8. CALENDAR CSV EXPORT ─────────────────────────────────────────
+
+function parseCalendarFromText(text) {
+  const days = [];
+  const dayRegex = /day\s*(\d+)[:\-\s]*/gi;
+  const lines = text.split('\n');
+  let currentDay = null;
+  let currentData = { tiktok:'', pinterest:'', email:'', blog:'' };
+
+  for (const line of lines) {
+    const dayMatch = line.match(/^day\s*(\d+)/i);
+    if (dayMatch) {
+      if (currentDay) days.push({ day: currentDay, ...currentData });
+      currentDay = parseInt(dayMatch[1]);
+      currentData = { tiktok:'', pinterest:'', email:'', blog:'' };
+      continue;
+    }
+    if (!currentDay) continue;
+    const l = line.toLowerCase();
+    if (l.includes('tiktok')) currentData.tiktok = line.replace(/.*tiktok[:\-\s]*/i,'').trim();
+    else if (l.includes('pinterest')) currentData.pinterest = line.replace(/.*pinterest[:\-\s]*/i,'').trim();
+    else if (l.includes('email')) currentData.email = line.replace(/.*email[:\-\s]*/i,'').trim();
+    else if (l.includes('blog')) currentData.blog = line.replace(/.*blog[:\-\s]*/i,'').trim();
+  }
+  if (currentDay) days.push({ day: currentDay, ...currentData });
+  return days;
+}
+
+function renderCalendarPreview() {
+  const calData = allOutputs[12];
+  if (!calData) {
+    document.getElementById('cal-no-data').style.display = 'block';
+    document.getElementById('cal-ready').style.display = 'none';
+    return;
+  }
+  document.getElementById('cal-no-data').style.display = 'none';
+  document.getElementById('cal-ready').style.display = 'block';
+
+  const days = parseCalendarFromText(calData);
+  const preview = days.slice(0, 7);
+  const rowsEl = document.getElementById('cal-preview-rows');
+  if (!preview.length) {
+    rowsEl.innerHTML = '<div style="padding:1rem;color:var(--muted);font-size:12px">Could not parse calendar. Download CSV to see raw data.</div>';
+    return;
+  }
+  rowsEl.innerHTML = preview.map(d => `
+    <div class="cal-row">
+      <div class="cal-cell" style="font-weight:600;color:var(--accent2)">Day ${d.day}</div>
+      <div class="cal-cell">${d.tiktok || '-'}</div>
+      <div class="cal-cell">${d.pinterest || '-'}</div>
+      <div class="cal-cell">${d.email || '-'}</div>
+      <div class="cal-cell">${d.blog || '-'}</div>
+    </div>`).join('');
+}
+
+function buildCalendarCSV() {
+  const calData = allOutputs[12] || '';
+  const days = parseCalendarFromText(calData);
+  if (!days.length) return calData; // fallback to raw text
+  const header = 'Day,TikTok,Pinterest,Email,Blog';
+  const rows = days.map(d => [
+    d.day,
+    `"${(d.tiktok||'').replace(/"/g,'""')}"`,
+    `"${(d.pinterest||'').replace(/"/g,'""')}"`,
+    `"${(d.email||'').replace(/"/g,'""')}"`,
+    `"${(d.blog||'').replace(/"/g,'""')}"`
+  ].join(','));
+  return [header, ...rows].join('\n');
+}
+
+function downloadCalendarCSV() {
+  const csv = buildCalendarCSV();
+  const blob = new Blob([csv], { type:'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `content-calendar-${Date.now()}.csv`;
+  a.click();
+  showToast('✓ CSV downloaded');
+}
+
+function copyCalendarCSV() {
+  const csv = buildCalendarCSV();
+  navigator.clipboard.writeText(csv).then(() => showToast('✓ CSV copied')).catch(() => { prompt('Copy CSV:', csv); });
+}
+
+// ─── REPURPOSE ENGINE ───────────────────────────────────────────────
+
+const TRANSFORMS = [
+  { id:'pin-title',     icon:'📌', label:'Pinterest title',       desc:'SEO-optimized pin title' },
+  { id:'pin-desc',      icon:'📝', label:'Pinterest description', desc:'Keyword-rich pin description' },
+  { id:'pin-overlay',   icon:'🖼️', label:'Pin overlay text',      desc:'Bold 6-word image overlay' },
+  { id:'tiktok-hook',   icon:'🎵', label:'TikTok hook',           desc:'3-second opening line' },
+  { id:'tiktok-script', icon:'🎬', label:'Full TikTok script',    desc:'30-45 sec voiceover script' },
+  { id:'reel-hook',     icon:'📸', label:'Reel hook',             desc:'Instagram opening line' },
+  { id:'reel-script',   icon:'🎥', label:'Full Reel script',      desc:'15-30 sec voiceover script' },
+  { id:'yt-hook',       icon:'▶️',  label:'YouTube hook',         desc:'YouTube Shorts opener' },
+  { id:'email-subject', icon:'✉️', label:'Email subject line',    desc:'Curiosity or urgency subject' },
+  { id:'email-body',    icon:'📧', label:'Full email',            desc:'Short-form email with CTA' },
+  { id:'blog-title',    icon:'📰', label:'Blog title',            desc:'SEO blog post headline' },
+  { id:'twitter-hook',  icon:'🐦', label:'X/Twitter hook',        desc:'Thread opener or single tweet' },
+  { id:'instagram-cap', icon:'💬', label:'Instagram caption',     desc:'Caption with hashtags' },
+  { id:'sms',           icon:'📱', label:'SMS/text message',      desc:'Under 160 chars with link' },
+  { id:'fb-post',       icon:'👥', label:'Facebook post',         desc:'Engaging organic post' },
+  { id:'fb-ad',         icon:'💰', label:'Facebook ad copy',      desc:'Hook + body + CTA ad' },
+];
+
+const TRANSFORM_PROMPTS = {
+  'pin-title':     'Transform the following into a single SEO-optimized Pinterest title. Under 100 characters. Include the main keyword. Make it curiosity-driven and clickable. Output the title only, nothing else.',
+  'pin-desc':      'Transform the following into a Pinterest description. 2-3 sentences. Include primary keyword, secondary keyword, and a call to action. SEO-optimized. Output the description only.',
+  'pin-overlay':   'Transform the following into bold Pinterest image overlay text. Maximum 8 words. Punchy, stops the scroll, creates curiosity or urgency. Output the overlay text only.',
+  'tiktok-hook':   'Transform the following into a TikTok opening hook. Maximum 1-2 sentences, spoken in under 3 seconds. Must create instant curiosity or shock. Output the hook line only.',
+  'tiktok-script': 'Transform the following into a full TikTok voiceover script (30-45 seconds). Format:\nHOOK: [3-second opener]\nBODY: [punchy sentences, conversational]\nCTA: [clear action]\nDELIVERY: [tone and pace note]\nOutput the script only, plain text, no markdown.',
+  'reel-hook':     'Transform the following into an Instagram Reel opening hook. 1 sentence, under 3 seconds, visual and aspirational. Output the hook line only.',
+  'reel-script':   'Transform the following into a full Instagram Reel voiceover script (15-30 seconds). Format:\nHOOK: [opener]\nBODY: [tight storytelling]\nCTA: [one action]\nDELIVERY: [tone note]\nOutput the script only, plain text, no markdown.',
+  'yt-hook':       'Transform the following into a YouTube Shorts opening hook. Bold claim or question, under 3 seconds, creates a curiosity loop. Output the hook line only.',
+  'email-subject': 'Transform the following into 5 email subject lines. Mix curiosity and urgency styles. Number each. Output subject lines only, plain text.',
+  'email-body':    'Transform the following into a short marketing email (150-200 words). Include: subject line, opening hook, 2-3 body paragraphs, and a CTA. Conversational tone. Plain text, no markdown.',
+  'blog-title':    'Transform the following into 5 SEO blog post titles. Mix listicles, how-tos, and problem-solution formats. Number each. Output titles only.',
+  'twitter-hook':  'Transform the following into a punchy X/Twitter thread opener or standalone tweet. Under 280 characters. Creates curiosity, controversy, or value. Output the tweet only.',
+  'instagram-cap': 'Transform the following into an Instagram caption. 3-4 sentences, conversational, ends with a question or CTA. Add 10 relevant hashtags on a new line. Plain text only.',
+  'sms':           'Transform the following into an SMS marketing message. Under 160 characters. Include urgency, value, and a short link placeholder [LINK]. Output the SMS text only.',
+  'fb-post':       'Transform the following into a Facebook organic post. 3-5 sentences, conversational and relatable, starts with a strong hook line, ends with a question to drive comments. No hashtags. Plain text only.',
+  'fb-ad':         'Transform the following into Facebook ad copy. Format: HEADLINE: [5-8 words, bold claim] BODY: [3-4 sentences, problem-agitate-solve, conversational] CTA: [one clear action button text]. Output plain text only, no markdown.',
+};
+
+let repurposeSource = '';
+let repurposeSourceLabel = '';
+let activeTransform = null;
+
+function openRepurpose(text, label) {
+  repurposeSourceLabel = label;
+  activeTransform = null;
+
+  // Put a helpful excerpt in the textarea — user can edit/replace it
+  const excerpt = text.length > 400 ? text.slice(0, 400) : text;
+  const input = document.getElementById('rp-source-input');
+  input.value = excerpt;
+
+  const fromLabel = document.getElementById('rp-from-label');
+  if (fromLabel) fromLabel.textContent = label ? 'Pre-filled from: ' + label + ' — edit or replace with any single hook' : '';
+
+  document.getElementById('rp-output').className = 'repurpose-output';
+  document.getElementById('rp-output').textContent = '';
+  document.getElementById('rp-actions').style.display = 'none';
+  document.querySelectorAll('.transform-btn').forEach(b => b.classList.remove('active'));
+
+  document.getElementById('repurpose-drawer').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+
+  // Focus and select so user can immediately type/paste
+  setTimeout(() => { input.focus(); input.select(); }, 350);
+}
+
+function closeRepurpose() {
+  document.getElementById('repurpose-drawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+}
+
+async function runTransform(transformId, btn) {
+  // Always read from the textarea — user controls what gets transformed
+  const sourceText = document.getElementById('rp-source-input').value.trim();
+  if (!sourceText) { showToast('⚠ Paste or type something in the box above first'); return; }
+
+  const key = document.getElementById('api-key').value.trim();
+  if (!key) { showToast('⚠ Add your OpenRouter API key'); return; }
+
+  activeTransform = transformId;
+  document.querySelectorAll('.transform-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const out = document.getElementById('rp-output');
+  out.className = 'repurpose-output loading';
+  out.textContent = 'Transforming...';
+  document.getElementById('rp-actions').style.display = 'none';
+
+  const labelEl = document.getElementById('rp-output-label');
+  if (labelEl) labelEl.style.display = 'block';
+
+  const bookCtx = bookContent ? `\n\nSOURCE DOCUMENT CONTEXT — use only facts, names, and concepts from this document. Do not invent anything not present here:\n${bookContent.slice(0, 8000)}` : '';
+  const systemPrompt = `You are a world-class copywriter and content strategist. Transform the provided content as instructed. Be specific, punchy, and commercial. Plain text output only — no markdown, no headers, no preamble.${bookCtx}`;
+  const userMsg = `${TRANSFORM_PROMPTS[transformId]}\n\nCONTENT TO TRANSFORM:\n${sourceText}`;
+
+  try {
+    const result = await callLLM(systemPrompt, userMsg);
+    out.className = 'repurpose-output ready';
+    out.textContent = result;
+    document.getElementById('rp-actions').style.display = 'flex';
+    showToast('✓ Transformed!');
+  } catch(e) {
+    out.className = 'repurpose-output ready';
+    out.textContent = 'Error: ' + e.message;
+    document.getElementById('rp-actions').style.display = 'flex';
+  }
+}
+
+function copyRepurposeOutput() {
+  const text = document.getElementById('rp-output').textContent;
+  navigator.clipboard.writeText(text).then(() => showToast('✓ Copied!')).catch(() => { prompt('Copy:', text); });
+}
+
+function repurposeAgain() {
+  const out = document.getElementById('rp-output');
+  out.className = 'repurpose-output';
+  out.textContent = '';
+  document.getElementById('rp-actions').style.display = 'none';
+  document.querySelectorAll('.transform-btn').forEach(b => b.classList.remove('active'));
+  activeTransform = null;
+  document.getElementById('rp-source-input').focus();
+}
+
+// Patch action row to include repurpose button
+const _origBuildTabs = buildTabsIfNeeded;
+function buildTabsIfNeeded() {
+  const tabsEl = document.getElementById('output-tabs');
+  const sectionsEl = document.getElementById('output-sections');
+  tabsEl.innerHTML = '';
+  sectionsEl.innerHTML = '';
+
+  const toGen = [...selectedSections].map(Number).filter(n => SECTION_PROMPTS[n]).sort((a,b)=>a-b);
+
+  toGen.forEach((id, i) => {
+    const tab = document.createElement('div');
+    tab.className = 'tab' + (i === 0 ? ' active' : '');
+    tab.id = 'tab-'+id;
+    tab.textContent = SECTION_NAMES[id];
+    tab.onclick = () => switchTab(id);
+    tabsEl.appendChild(tab);
+
+    const sec = document.createElement('div');
+    sec.className = 'section-block' + (i === 0 ? ' active' : '');
+    sec.id = 'sec-'+id;
+    sec.innerHTML = `
+      <div class="out-content loading" id="out-${id}">Generating ${SECTION_NAMES[id]}...</div>
+      <div class="action-row">
+        <button class="btn-sm" onclick="copySection(${id})">📋 Copy</button>
+        <button class="btn-sm" onclick="downloadSection(${id})">⬇ Download</button>
+        <button class="repurpose-btn" onclick="openRepurpose(allOutputs[${id}] || '', '${SECTION_NAMES[id]}')">⚡ Repurpose</button>
+      </div>`;
+    sectionsEl.appendChild(sec);
+    if (i === 0) currentTabId = id;
+  });
+
+  updateResultsHeader();
+}
+</script>
+<div class="overlay" id="overlay" onclick="closeRepurpose()"></div>
+
+<div class="repurpose-drawer" id="repurpose-drawer">
+  <div class="repurpose-header">
+    <div class="repurpose-title">⚡ Repurpose</div>
+    <button class="repurpose-close" onclick="closeRepurpose()">✕</button>
+  </div>
+  <div class="repurpose-body">
+    <div>
+      <div class="repurpose-source-label" id="rp-source-label">PASTE OR EDIT YOUR HOOK</div>
+      <textarea id="rp-source-input" class="repurpose-source" style="width:100%;min-height:90px;resize:vertical;font-family:inherit;font-size:13px;line-height:1.6;color:var(--text);background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;" placeholder="Paste a single hook, title, script, or any text here — then pick a transform below..."></textarea>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px" id="rp-from-label"></div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Transform into</div>
+      <div class="transform-grid" id="transform-grid"></div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px" id="rp-output-label" style="display:none">Output</div>
+      <div class="repurpose-output" id="rp-output"></div>
     </div>
   </div>
-</div>
-
-<div class="overlay" id="add-repo-modal" style="display:none" onclick="closeModal(event,'add-repo-modal')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h2>+ Add Existing Repository</h2>
-    <div class="form-group"><label>Local Folder Path *</label><input type="text" id="ar-path" placeholder="/Users/mollah/Desktop/my-project" /><div class="hint">Must be an existing git repo.</div></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" onclick="document.getElementById('add-repo-modal').style.display='none'">Cancel</button>
-      <button class="btn btn-blue" onclick="addRepo()">Add Repository</button>
-    </div>
-  </div>
-</div>
-
-<div class="overlay" id="branch-modal" style="display:none" onclick="closeModal(event,'branch-modal')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h2>Branches</h2>
-    <div class="form-group"><label>New Branch Name</label><input type="text" id="new-branch-name" placeholder="feature/my-feature" /></div>
-    <button class="btn btn-ghost" style="width:100%;margin-bottom:16px;justify-content:center" onclick="createBranch()">Create & Switch to New Branch</button>
-    <div class="sidebar-label" style="margin-bottom:8px">Switch Branch</div>
-    <div id="branch-list" style="max-height:200px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;"></div>
-    <div class="modal-footer"><button class="btn btn-ghost" onclick="document.getElementById('branch-modal').style.display='none'">Close</button></div>
-  </div>
-</div>
-
-<div class="overlay" id="pull-modal" style="display:none" onclick="closeModal(event,'pull-modal')">
-  <div class="modal" onclick="event.stopPropagation()" style="width:360px;text-align:center">
-    <h2>↓ Pull from GitHub</h2>
-    <p style="color:var(--muted);margin:12px 0 20px;font-size:13px">Pull latest changes from origin.</p>
-    <div class="modal-footer" style="justify-content:center">
-      <button class="btn btn-ghost" onclick="document.getElementById('pull-modal').style.display='none'">Cancel</button>
-      <button class="btn btn-blue" onclick="doPull()">Pull Now</button>
-    </div>
-  </div>
-</div>
-
-<div class="overlay" id="netlify-link-modal" style="display:none" onclick="closeModal(event,'netlify-link-modal')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h2>◆ Link to Netlify Site</h2>
-    <div id="netlify-sites-list" style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;"></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" onclick="unlinkNetlify()" style="margin-right:auto">Unlink</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('netlify-link-modal').style.display='none'">Close</button>
-    </div>
-  </div>
-</div>
-
-<div class="overlay" id="vercel-link-modal" style="display:none" onclick="closeModal(event,'vercel-link-modal')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h2>▲ Link to Vercel Project</h2>
-    <div id="vercel-projects-list" style="max-height:300px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;"></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" onclick="unlinkVercel()" style="margin-right:auto">Unlink</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('vercel-link-modal').style.display='none'">Close</button>
-    </div>
-  </div>
-</div>
-
-<div class="overlay" id="railway-link-modal" style="display:none" onclick="closeModal(event,'railway-link-modal')">
-  <div class="modal" onclick="event.stopPropagation()">
-    <h2>🚂 Link to Railway Service</h2>
-    <p style="color:var(--muted);font-size:13px;margin-bottom:16px">Choose which Railway service this repo is connected to.</p>
-    <div id="railway-services-list" style="max-height:340px;overflow-y:auto;"></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" onclick="unlinkRailway()" style="margin-right:auto">Unlink</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('railway-link-modal').style.display='none'">Close</button>
-    </div>
-  </div>
-</div>
-
-<div class="overlay" id="railway-logs-modal" style="display:none" onclick="closeModal(event,'railway-logs-modal')">
-  <div class="modal" onclick="event.stopPropagation()" style="width:640px">
-    <h2>📋 Railway Logs — <span id="logs-service-name"></span></h2>
-    <div class="log-viewer" id="log-viewer"><div style="color:var(--muted)">Loading logs…</div></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost btn-sm" onclick="refreshLogs()">↺ Refresh</button>
-      <button class="btn btn-ghost" onclick="document.getElementById('railway-logs-modal').style.display='none'">Close</button>
-    </div>
+  <div class="repurpose-actions" id="rp-actions" style="display:none">
+    <button class="btn btn-primary" style="flex:1;padding:8px" onclick="copyRepurposeOutput()">📋 Copy output</button>
+    <button class="btn btn-secondary" style="padding:8px 14px" onclick="repurposeAgain()">↩ Reset</button>
   </div>
 </div>
 
 <script>
-let currentRepo = null, allFiles = [], selectedFile = null, currentTab = 'changes';
-let repoNetlify = null, repoVercel = null, repoRailway = null;
-let deployStatusInterval = null;
+// ─── BULK GENERATE FROM BOOK ────────────────────────────────────────
 
-async function init() {
-  const cfg = await api('/api/config');
-  if (!cfg.hasToken) { document.getElementById('setup-screen').style.display = 'flex'; return; }
-  loadUser(); loadRepos(cfg.repos); updateSettingsStatus(cfg);
-}
+let bgenSelected = new Set([1,2,3,4,5,6,7,8,9,10,11,12,13]);
+let bgenRunning = false;
 
-async function loadUser() {
-  try {
-    const u = await api('/api/whoami');
-    document.getElementById('user-pill').style.display = 'flex';
-    document.getElementById('user-avatar').src = u.avatar;
-    document.getElementById('user-login').textContent = u.login;
-  } catch {}
-}
+function openBulkGenModal() {
+  if (!bookContent) { showToast('⚠ Upload a book first'); return; }
+  const offer = document.getElementById('offer-input').value.trim();
+  if (!offer) { showToast('⚠ Fill in your offer on the setup page first'); openTool('bookupload'); return; }
 
-function loadRepos(repos) {
-  const sel = document.getElementById('repo-select');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">— Select a repository —</option>';
-  repos.forEach(r => { const o = document.createElement('option'); o.value = r.localPath; o.textContent = r.name; sel.appendChild(o); });
-  if (cur) sel.value = cur;
-}
+  // Update book name badge
+  const ind = document.getElementById('book-indicator-text');
+  document.getElementById('bgen-book-name').textContent = ind ? ind.textContent.replace('📖 ','') : 'Book loaded';
 
-function updateSettingsStatus(cfg) {
-  document.getElementById('github-status').innerHTML = cfg.hasToken ? '<span class="connected-badge connected-github">✓ Connected</span>' : '<span style="color:var(--muted);font-size:13px">Not connected</span>';
-  document.getElementById('netlify-status').innerHTML = cfg.hasNetlify ? '<span class="connected-badge connected-netlify">✓ Netlify Connected</span>' : '<span style="color:var(--muted);font-size:13px">Not connected</span>';
-  document.getElementById('vercel-status').innerHTML = cfg.hasVercel ? '<span class="connected-badge connected-vercel">✓ Vercel Connected</span>' : '<span style="color:var(--muted);font-size:13px">Not connected</span>';
-  document.getElementById('railway-status').innerHTML = cfg.hasRailway ? '<span class="connected-badge connected-railway">✓ Railway Connected</span>' : '<span style="color:var(--muted);font-size:13px">Not connected</span>';
-  const tgEl = document.getElementById('telegram-status');
-  if (tgEl) tgEl.innerHTML = cfg.hasTelegram ? '<span class="connected-badge connected-telegram">✓ Telegram Connected</span>' : '<span style="color:var(--muted);font-size:13px">Not connected</span>';
-  const tgActions = document.getElementById('telegram-actions');
-  if (tgActions) tgActions.style.display = cfg.hasTelegram ? 'flex' : 'none';
-}
-
-async function saveToken() {
-  const token = document.getElementById('setup-token').value.trim();
-  if (!token) return toast('Enter your GitHub token', 'error');
-  await api('/api/token', 'POST', { token });
-  document.getElementById('setup-screen').style.display = 'none';
-  init(); toast('GitHub connected!', 'success');
-}
-
-async function saveNetlifyToken() {
-  const token = document.getElementById('netlify-token-input').value.trim();
-  if (!token) return toast('Enter your Netlify token', 'error');
-  try {
-    const r = await api('/api/netlify/token', 'POST', { token });
-    toast(`Netlify connected as ${r.name}`, 'success');
-    document.getElementById('netlify-token-input').value = '';
-    const cfg = await api('/api/config'); updateSettingsStatus(cfg);
-    if (currentRepo) updateDeploySection();
-  } catch (e) { toast('Netlify error: ' + e.message, 'error'); }
-}
-
-async function saveVercelToken() {
-  const token = document.getElementById('vercel-token-input').value.trim();
-  if (!token) return toast('Enter your Vercel token', 'error');
-  try {
-    const r = await api('/api/vercel/token', 'POST', { token });
-    toast(`Vercel connected as ${r.name}`, 'success');
-    document.getElementById('vercel-token-input').value = '';
-    const cfg = await api('/api/config'); updateSettingsStatus(cfg);
-    if (currentRepo) updateDeploySection();
-  } catch (e) { toast('Vercel error: ' + e.message, 'error'); }
-}
-
-async function saveRailwayToken() {
-  const token = document.getElementById('railway-token-input').value.trim();
-  if (!token) return toast('Enter your Railway token', 'error');
-  try {
-    const r = await api('/api/railway/token', 'POST', { token });
-    toast(`Railway connected as ${r.name}`, 'success');
-    document.getElementById('railway-token-input').value = '';
-    const cfg = await api('/api/config'); updateSettingsStatus(cfg);
-    if (currentRepo) updateDeploySection();
-  } catch (e) { toast('Railway error: ' + e.message, 'error'); }
-}
-
-async function selectRepo(localPath) {
-  clearInterval(deployStatusInterval);
-  if (!localPath) {
-    currentRepo = null; repoNetlify = null; repoVercel = null; repoRailway = null;
-    document.getElementById('no-repo-msg').style.display = 'flex';
-    document.getElementById('repo-view').style.display = 'none';
-    document.getElementById('commit-panel').style.display = 'none';
-    document.getElementById('branch-display').style.display = 'none';
-    document.getElementById('pull-btn').style.display = 'none';
-    document.getElementById('deploy-bar').classList.remove('visible');
-    document.getElementById('file-list').innerHTML = '<div class="empty-state" style="padding:40px 20px"><p>Select a repository</p></div>';
-    document.getElementById('select-all-row').style.display = 'none';
-    return;
-  }
-  currentRepo = localPath;
-  document.getElementById('no-repo-msg').style.display = 'none';
-  document.getElementById('repo-view').style.display = 'flex';
-  document.getElementById('commit-panel').style.display = 'block';
-  document.getElementById('branch-display').style.display = 'flex';
-  document.getElementById('pull-btn').style.display = 'inline-flex';
-  switchTab('changes');
-  await refreshStatus();
-}
-
-async function refreshStatus() {
-  if (!currentRepo) return;
-  try {
-    const data = await api('/api/status', 'POST', { localPath: currentRepo });
-    allFiles = data.files; repoNetlify = data.netlify; repoVercel = data.vercel; repoRailway = data.railway;
-    document.getElementById('branch-name').textContent = data.branch;
-    document.getElementById('ahead-badge').style.display = data.ahead > 0 ? 'inline' : 'none';
-    if (data.ahead > 0) document.getElementById('ahead-badge').textContent = `+${data.ahead}`;
-    renderFileList(); updateDeployBar();
-  } catch (e) { toast('Error: ' + e.message, 'error'); }
-}
-
-function renderFileList() {
-  const list = document.getElementById('file-list');
-  const row = document.getElementById('select-all-row');
-  if (!allFiles.length) {
-    list.innerHTML = '<div class="empty-state" style="padding:40px 20px"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg><p>No changes — working tree clean</p></div>';
-    row.style.display = 'none'; document.getElementById('file-count').textContent = ''; return;
-  }
-  row.style.display = 'flex';
-  document.getElementById('file-count').textContent = `${allFiles.length} file${allFiles.length !== 1 ? 's' : ''}`;
-  list.innerHTML = allFiles.map((f, i) => `
-    <div class="file-item ${selectedFile === f.file ? 'selected' : ''}" onclick="viewDiff('${f.file.replace(/'/g,"\\'")}',this)">
-      <input type="checkbox" checked data-idx="${i}" onclick="event.stopPropagation()" />
-      <span class="file-name" title="${f.file}">${f.file}</span>
-      <span class="badge badge-${f.type}">${f.type}</span>
-    </div>`).join('');
-  updateSelectAll();
-}
-
-function toggleSelectAll() {
-  const cb = document.getElementById('select-all-cb'); cb.checked = !cb.checked;
-  document.querySelectorAll('#file-list input[type=checkbox]').forEach(c => c.checked = cb.checked);
-}
-function updateSelectAll() {
-  const all = [...document.querySelectorAll('#file-list input[type=checkbox]')];
-  document.getElementById('select-all-cb').checked = all.length > 0 && all.every(c => c.checked);
-}
-
-// ---- DEPLOY BAR ----
-function updateDeployBar() {
-  const bar = document.getElementById('deploy-bar');
-  let hasAny = false;
-  if (repoNetlify) { document.getElementById('netlify-deploy-card').style.display='flex'; document.getElementById('netlify-site-name').textContent=repoNetlify.siteName; hasAny=true; fetchNetlifyStatus(); } else { document.getElementById('netlify-deploy-card').style.display='none'; }
-  if (repoVercel) { document.getElementById('vercel-deploy-card').style.display='flex'; document.getElementById('vercel-project-name').textContent=repoVercel.projectName; hasAny=true; fetchVercelStatus(); } else { document.getElementById('vercel-deploy-card').style.display='none'; }
-  if (repoRailway) { document.getElementById('railway-deploy-card').style.display='flex'; document.getElementById('railway-service-name').textContent=repoRailway.serviceName; hasAny=true; fetchRailwayStatus(); } else { document.getElementById('railway-deploy-card').style.display='none'; }
-  bar.classList.toggle('visible', hasAny);
-  document.getElementById('auto-deploy-toggle-wrap').style.display = hasAny ? 'flex' : 'none';
-  clearInterval(deployStatusInterval);
-  if (hasAny) {
-    deployStatusInterval = setInterval(() => {
-      if (repoNetlify) fetchNetlifyStatus();
-      if (repoVercel) fetchVercelStatus();
-      if (repoRailway) fetchRailwayStatus();
-    }, 10000);
-  }
-}
-
-async function fetchNetlifyStatus() {
-  try { const d = await api(`/api/netlify/status/${repoNetlify.siteId}`); setDeployStatus('netlify', d.state, d.url); } catch {}
-}
-async function fetchVercelStatus() {
-  try { const d = await api(`/api/vercel/status/${repoVercel.projectId}`); setDeployStatus('vercel', d.state, d.url); } catch {}
-}
-async function fetchRailwayStatus() {
-  try { const d = await api(`/api/railway/status/${repoRailway.serviceId}`); setRailwayStatus(d.status); } catch {}
-}
-
-function setDeployStatus(platform, state, url) {
-  const el = document.getElementById(`${platform}-deploy-status`);
-  const urlEl = document.getElementById(`${platform}-deploy-url`);
-  el.className = 'deploy-status';
-  if (['ready','READY'].includes(state)) { el.classList.add('status-ready'); el.textContent = '✓ Ready'; }
-  else if (['building','processing','uploading','enqueued','BUILDING','INITIALIZING'].includes(state)) { el.classList.add('status-building'); el.textContent = '⟳ Building'; }
-  else if (['error','failed','ERROR'].includes(state)) { el.classList.add('status-error'); el.textContent = '✕ Failed'; }
-  else { el.classList.add('status-unknown'); el.textContent = state || '—'; }
-  if (url && urlEl) { urlEl.style.display='inline'; urlEl.href=url; urlEl.textContent=url.replace('https://','').substring(0,28)+(url.length>35?'…':''); }
-}
-
-function setRailwayStatus(status) {
-  const el = document.getElementById('railway-deploy-status');
-  el.className = 'deploy-status';
-  if (['SUCCESS','ACTIVE'].includes(status)) { el.classList.add('status-ready'); el.textContent = '✓ Active'; }
-  else if (['BUILDING','DEPLOYING','INITIALIZING'].includes(status)) { el.classList.add('status-building'); el.textContent = '⟳ Deploying'; }
-  else if (['FAILED','CRASHED','ERROR'].includes(status)) { el.classList.add('status-error'); el.textContent = '✕ ' + status; }
-  else { el.classList.add('status-unknown'); el.textContent = status || '—'; }
-}
-
-async function triggerNetlifyDeploy() {
-  const btn = document.getElementById('netlify-deploy-btn');
-  btn.disabled=true; btn.innerHTML='<span class="loading"></span>';
-  try {
-    const repoName = document.getElementById('repo-select').options[document.getElementById('repo-select').selectedIndex].text;
-    notifyDeploy('Netlify', repoName, 'started', null);
-    await api('/api/netlify/deploy','POST',{siteId:repoNetlify.siteId});
-    toast('Netlify deploy triggered ✓','success');
-    setDeployStatus('netlify','building',null);
-    setTimeout(async () => {
-      const s = await api('/api/netlify/status/' + repoNetlify.siteId);
-      notifyDeploy('Netlify', repoName, s.state === 'ready' ? 'success' : 'failed', s.url);
-      if (s.url) setTimeout(() => checkUptime(s.url, repoName, 'Netlify'), 5000);
-    }, 60000);
-  }
-  catch(e) { toast('Netlify error: '+e.message,'error'); }
-  btn.disabled=false; btn.textContent='▶ Deploy';
-}
-
-async function triggerVercelDeploy() {
-  const btn = document.getElementById('vercel-deploy-btn');
-  btn.disabled=true; btn.innerHTML='<span class="loading"></span>';
-  try {
-    const repoName2 = document.getElementById('repo-select').options[document.getElementById('repo-select').selectedIndex].text;
-    notifyDeploy('Vercel', repoName2, 'started', null);
-    await api('/api/vercel/deploy','POST',{projectId:repoVercel.projectId,projectName:repoVercel.projectName});
-    toast('Vercel deploy triggered ✓','success');
-    setDeployStatus('vercel','building',null);
-    setTimeout(async () => {
-      const s = await api('/api/vercel/status/' + repoVercel.projectId);
-      notifyDeploy('Vercel', repoName2, s.state === 'READY' ? 'success' : 'failed', s.url);
-      if (s.url) setTimeout(() => checkUptime(s.url, repoName2, 'Vercel'), 5000);
-    }, 60000);
-  }
-  catch(e) { toast('Vercel error: '+e.message,'error'); }
-  btn.disabled=false; btn.textContent='▶ Deploy';
-}
-
-async function triggerRailwayRedeploy() {
-  const btn = document.getElementById('railway-deploy-btn');
-  btn.disabled=true; btn.innerHTML='<span class="loading"></span>';
-  try {
-    const repoName3 = document.getElementById('repo-select').options[document.getElementById('repo-select').selectedIndex].text;
-    notifyDeploy('Railway', repoName3, 'started', null);
-    await api('/api/railway/redeploy','POST',{serviceId:repoRailway.serviceId, environmentId:repoRailway.environmentId});
-    toast('Railway redeploy triggered ✓','success'); setRailwayStatus('DEPLOYING');
-    notifyDeploy('Railway', repoName3, 'success', null);
-  } catch(e) { toast('Railway error: '+e.message,'error'); }
-  btn.disabled=false; btn.textContent='↺ Redeploy';
-}
-
-async function showRailwayLogs() {
-  if (!repoRailway) return;
-  document.getElementById('railway-logs-modal').style.display='flex';
-  document.getElementById('logs-service-name').textContent = repoRailway.serviceName;
-  await refreshLogs();
-}
-
-async function refreshLogs() {
-  const viewer = document.getElementById('log-viewer');
-  viewer.innerHTML = '<div style="color:var(--muted)">Loading…</div>';
-  try {
-    // Get latest deployment ID first
-    const status = await api(`/api/railway/status/${repoRailway.serviceId}`);
-    if (!status.deployId) { viewer.innerHTML = '<div style="color:var(--muted)">No deployment found</div>'; return; }
-    const data = await api(`/api/railway/logs/${status.deployId}`);
-    if (!data.logs?.length) { viewer.innerHTML = '<div style="color:var(--muted)">No logs available</div>'; return; }
-    viewer.innerHTML = data.logs.map(l => {
-      const time = new Date(l.timestamp).toLocaleTimeString();
-      const cls = l.severity === 'ERROR' ? 'log-error' : l.severity === 'WARN' ? 'log-warn' : 'log-msg';
-      return `<div class="log-line"><span class="log-time">${time}</span><span class="${cls}">${l.message.replace(/</g,'&lt;')}</span></div>`;
-    }).join('');
-    viewer.scrollTop = viewer.scrollHeight;
-  } catch(e) { viewer.innerHTML = `<div style="color:var(--deleted)">${e.message}</div>`; }
-}
-
-// ---- RAILWAY TAB ----
-async function loadRailwayTab() {
-  const content = document.getElementById('railway-content');
-  const cfg = await api('/api/config');
-  if (!cfg.hasRailway) {
-    content.innerHTML = '<div class="empty-state"><p>Connect Railway in ⚙ Settings to see your services</p></div>';
-    return;
-  }
-  content.innerHTML = '<div style="color:var(--muted);padding:20px">Loading services…</div>';
-  try {
-    const data = await api('/api/railway/projects');
-    if (!data.projects?.length) { content.innerHTML = '<div style="color:var(--muted);padding:20px">No Railway projects found</div>'; return; }
-    content.innerHTML = data.projects.map(p => `
-      <div class="railway-project">
-        <div class="railway-project-name">${p.name}</div>
-        ${p.services.map(s => {
-          let statusCls = 'status-unknown', statusTxt = s.status;
-          if (['SUCCESS','ACTIVE'].includes(s.status)) { statusCls='status-ready'; statusTxt='✓ Active'; }
-          else if (['BUILDING','DEPLOYING'].includes(s.status)) { statusCls='status-building'; statusTxt='⟳ Deploying'; }
-          else if (['FAILED','CRASHED'].includes(s.status)) { statusCls='status-error'; statusTxt='✕ '+s.status; }
-          const time = s.lastDeploy ? new Date(s.lastDeploy).toLocaleString() : 'Never';
-          return `<div class="railway-service-item">
-            <div style="width:8px;height:8px;border-radius:50%;background:${statusCls.includes('ready')?'var(--new)':statusCls.includes('building')?'var(--modified)':statusCls.includes('error')?'var(--deleted)':'var(--muted)'};flex-shrink:0"></div>
-            <div class="railway-service-name">${s.name}</div>
-            <span class="deploy-status ${statusCls}">${statusTxt}</span>
-            <span class="railway-service-time">${time}</span>
-          </div>`;
-        }).join('')}
-      </div>`).join('');
-  } catch(e) { content.innerHTML = `<div style="color:var(--deleted);padding:20px">${e.message}</div>`; }
-}
-
-// ---- RAILWAY LINK MODAL ----
-async function showRailwayLinkModal() {
-  document.getElementById('railway-link-modal').style.display='flex';
-  const listEl = document.getElementById('railway-services-list');
-  listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">Loading…</div>';
-  try {
-    const data = await api('/api/railway/projects');
-    listEl.innerHTML = data.projects.map(p => `
-      <div class="railway-project" style="margin-bottom:12px">
-        <div class="railway-project-name" style="padding:4px 0">${p.name}</div>
-        ${p.services.map(s => `
-          <div class="link-item" onclick="linkRailwayService('${s.id}','${s.name.replace(/'/g,"\\'")}','${p.id}','${p.name.replace(/'/g,"\\'")}')">
-            <div><div class="link-item-name">${s.name}</div><div class="link-item-url">${p.name}</div></div>
-            <span class="deploy-status ${['SUCCESS','ACTIVE'].includes(s.status)?'status-ready':['FAILED','CRASHED'].includes(s.status)?'status-error':'status-unknown'}">${s.status}</span>
-          </div>`).join('')}
-      </div>`).join('');
-  } catch(e) { listEl.innerHTML = `<div style="padding:20px;color:var(--deleted)">${e.message}</div>`; }
-}
-
-async function linkRailwayService(serviceId, serviceName, projectId, projectName) {
-  await api('/api/railway/link','POST',{localPath:currentRepo,serviceId,serviceName,projectId,projectName});
-  repoRailway = {serviceId,serviceName,projectId,projectName};
-  toast(`Linked to ${serviceName}`,'success');
-  document.getElementById('railway-link-modal').style.display='none';
-  updateDeployBar(); updateDeploySection();
-}
-
-async function unlinkRailway() {
-  await api('/api/railway/unlink','POST',{localPath:currentRepo});
-  repoRailway = null; toast('Railway unlinked','info');
-  document.getElementById('railway-link-modal').style.display='none';
-  updateDeployBar(); updateDeploySection();
-}
-
-// ---- TABS ----
-function switchTab(tab) {
-  currentTab = tab;
-  ['changes','history','railway','settings'].forEach(t => {
-    const el = document.getElementById(`tab-${t}`);
-    if (el) el.classList.toggle('active', t === tab);
+  // Build section checkboxes
+  const grid = document.getElementById('bgen-section-grid');
+  grid.innerHTML = '';
+  Object.entries(SECTION_NAMES).forEach(([id, name]) => {
+    const numId = Number(id);
+    const item = document.createElement('label');
+    item.className = 'bgen-section-item' + (bgenSelected.has(numId) ? ' selected' : '');
+    item.innerHTML = `<input type="checkbox" ${bgenSelected.has(numId) ? 'checked' : ''} onchange="bgenToggle(${numId}, this)"><span class="bgen-section-label">${id}. ${name}</span>`;
+    item.onclick = e => { if (e.target.tagName !== 'INPUT') { const cb = item.querySelector('input'); cb.checked = !cb.checked; bgenToggle(numId, cb); } };
+    grid.appendChild(item);
   });
-  document.getElementById('diff-view').style.display = tab==='changes'?'block':'none';
-  document.getElementById('history-view').style.display = tab==='history'?'block':'none';
-  document.getElementById('railway-view').style.display = tab==='railway'?'block':'none';
-  document.getElementById('settings-view').style.display = tab==='settings'?'block':'none';
-  document.getElementById('commit-panel').style.display = tab==='changes'?'block':'none';
-  if (tab==='history') loadHistory();
-  if (tab==='railway') loadRailwayTab();
-  if (tab==='settings') loadSettingsTab();
+
+  // Reset progress
+  document.getElementById('bgen-progress').style.display = 'none';
+  document.getElementById('bgen-progress-fill').style.width = '0%';
+  document.getElementById('bgen-progress-text').textContent = 'Starting...';
+  document.getElementById('bgen-run-btn').disabled = false;
+  document.getElementById('bgen-run-btn').textContent = '⚡ Generate selected sections';
+  bgenRunning = false;
+
+  document.getElementById('bgen-overlay').classList.add('open');
 }
 
-async function loadSettingsTab() {
-  const cfg = await api('/api/config'); updateSettingsStatus(cfg); updateDeploySection();
+function closeBulkGenModal(e) {
+  if (bgenRunning) { showToast('Generation in progress — please wait'); return; }
+  if (e && e.target !== document.getElementById('bgen-overlay')) return;
+  document.getElementById('bgen-overlay').classList.remove('open');
 }
 
-function updateDeploySection() {
-  api('/api/config').then(cfg => {
-    document.getElementById('netlify-link-section').style.display = cfg.hasNetlify && currentRepo ? 'block' : 'none';
-    document.getElementById('vercel-link-section').style.display = cfg.hasVercel && currentRepo ? 'block' : 'none';
-    document.getElementById('railway-link-section').style.display = cfg.hasRailway && currentRepo ? 'block' : 'none';
-    document.getElementById('netlify-linked-info').innerHTML = repoNetlify ? `<span class="connected-badge connected-netlify">◆ ${repoNetlify.siteName}</span>` : '<span style="color:var(--muted);font-size:13px">Not linked</span>';
-    document.getElementById('vercel-linked-info').innerHTML = repoVercel ? `<span class="connected-badge connected-vercel">▲ ${repoVercel.projectName}</span>` : '<span style="color:var(--muted);font-size:13px">Not linked</span>';
-    document.getElementById('railway-linked-info').innerHTML = repoRailway ? `<span class="connected-badge connected-railway">🚂 ${repoRailway.serviceName}</span>` : '<span style="color:var(--muted);font-size:13px">Not linked</span>';
+function bgenToggle(id, cb) {
+  const item = cb.closest('.bgen-section-item');
+  if (cb.checked) { bgenSelected.add(id); item.classList.add('selected'); }
+  else { bgenSelected.delete(id); item.classList.remove('selected'); }
+}
+
+function bgenSelectAll() {
+  bgenSelected = new Set(Object.keys(SECTION_NAMES).map(Number));
+  document.querySelectorAll('.bgen-section-item').forEach(item => {
+    item.classList.add('selected');
+    item.querySelector('input').checked = true;
   });
 }
 
-async function loadHistory() {
-  const el = document.getElementById('commit-log');
-  el.innerHTML = '<div style="padding:20px;color:var(--muted)">Loading…</div>';
-  const data = await api('/api/log','POST',{localPath:currentRepo});
-  if (!data.commits.length) { el.innerHTML = '<div style="padding:20px;color:var(--muted)">No commits yet.</div>'; return; }
-  el.innerHTML = data.commits.map(c => `<div class="commit-log-item"><span class="commit-hash">${c.short}</span><div><div class="commit-subject">${c.subject}</div><div class="commit-meta">${c.author} · ${c.time}</div></div></div>`).join('');
+function bgenDeselectAll() {
+  bgenSelected.clear();
+  document.querySelectorAll('.bgen-section-item').forEach(item => {
+    item.classList.remove('selected');
+    item.querySelector('input').checked = false;
+  });
 }
 
-async function doCommit() {
-  const msg = document.getElementById('commit-msg').value.trim();
-  if (!msg) return toast('Please enter a commit message','error');
-  const checked = [...document.querySelectorAll('#file-list input[type=checkbox]:checked')];
-  if (!checked.length) return toast('No files selected','error');
-  const files = checked.map(c => allFiles[parseInt(c.dataset.idx)].file);
-  const push = document.getElementById('push-toggle').checked;
-  const autoDeploy = document.getElementById('auto-deploy-toggle').checked;
-  const btn = document.getElementById('commit-btn');
-  btn.disabled=true; btn.innerHTML='<span class="loading"></span>';
-  try {
-    await api('/api/commit','POST',{localPath:currentRepo,files,message:msg,push});
-    toast(push?'Committed & pushed ✓':'Committed locally ✓','success');
-    document.getElementById('commit-msg').value='';
-    await refreshStatus();
-    if (push && autoDeploy) {
-      if (repoNetlify) setTimeout(triggerNetlifyDeploy,1500);
-      if (repoVercel) setTimeout(triggerVercelDeploy,1500);
-      // Railway auto-deploys via GitHub webhook, just refresh status
-      if (repoRailway) setTimeout(fetchRailwayStatus,5000);
+async function runFromBook() {
+  if (!bookContent) { showToast('⚠ No book loaded'); return; }
+  const offer = document.getElementById('offer-input').value.trim();
+  if (!offer) { showToast('⚠ Fill in your offer on the setup page first'); return; }
+  const key = document.getElementById('api-key').value.trim();
+  if (!key) { showToast('⚠ Add your OpenRouter API key'); return; }
+
+  const toGen = [...bgenSelected].filter(n => SECTION_PROMPTS[n]).sort((a,b)=>a-b);
+  if (!toGen.length) { showToast('⚠ Select at least one section'); return; }
+
+  bgenRunning = true;
+  const runBtn = document.getElementById('bgen-run-btn');
+  runBtn.disabled = true;
+  runBtn.textContent = '⏳ Generating...';
+  document.getElementById('bgen-progress').style.display = 'block';
+
+  // Sync selectedSections so tabs build correctly
+  selectedSections = new Set(toGen.map(String));
+
+  // Build the system prompt with book context
+  const bookContext = `\n\nSOURCE DOCUMENT — GROUND ALL OUTPUT IN THIS CONTENT ONLY:\nDo NOT invent chapter names, laws, principles, concepts, or quotes not present in this document. Use only what is written below.\n\n${bookContent.slice(0, 12000)}\n\nEND OF SOURCE DOCUMENT`;
+
+  const systemPrompt = `You are a world-class marketing expert — a fusion of Brendan Kane (viral content), David Ogilvy (advertising mastery), Gary Halbert (direct response), and Eugene Schwartz (copywriting psychology).
+
+THE OFFER:
+${offer}${bookContext}
+
+Before writing, mentally analyze:
+• Target audience (who exactly, demographics, psychographics)
+• Pain points (what keeps them up at night)
+• Frustrations (what have they already tried that failed)
+• Desires (what do they secretly want)
+• Goals (what transformation are they seeking)
+• Objections (why they might not buy)
+• Dreams (the ideal outcome)
+• Emotional triggers (what makes them act)
+
+Then produce the requested section with maximum specificity, creativity, and commercial power. Be brutally specific to THIS offer and THIS book's actual content. No generic marketing templates. Output only the section content — no preamble, no meta-commentary.
+
+CRITICAL FORMATTING RULE: Use plain text only. No markdown. No # headers, no ## headers, no ### headers, no *italics*, no **bold**, no __ underlines. Use CAPS for section headers and labels instead. Use plain dashes --- for dividers.`;
+
+  // Show results page and build tabs
+  allOutputs = {};
+  showResults();
+
+  for (let i = 0; i < toGen.length; i++) {
+    const id = toGen[i];
+    const pct = Math.round((i / toGen.length) * 100);
+    document.getElementById('bgen-progress-fill').style.width = pct + '%';
+    document.getElementById('bgen-progress-text').textContent = `Generating ${i+1} of ${toGen.length}: ${SECTION_NAMES[id]}...`;
+
+    setNavState(id, 'generating');
+    updateTabLoading(id, true);
+
+    try {
+      const result = await callLLM(systemPrompt, SECTION_PROMPTS[id]);
+      allOutputs[id] = result;
+      setNavState(id, 'done');
+      updateTabContent(id, result);
+    } catch(e) {
+      allOutputs[id] = `Error: ${e.message}\n\nCheck your API key and try again.`;
+      setNavState(id, '');
+      updateTabContent(id, allOutputs[id]);
     }
-  } catch(e) { toast('Error: '+e,'error'); }
-  btn.disabled=false; btn.textContent='Commit';
+
+    // Small delay between calls to avoid rate limiting
+    if (i < toGen.length - 1) await new Promise(r => setTimeout(r, 800));
+  }
+
+  document.getElementById('bgen-progress-fill').style.width = '100%';
+  document.getElementById('bgen-progress-text').textContent = `✓ All ${toGen.length} sections complete`;
+  bgenRunning = false;
+  runBtn.disabled = false;
+  runBtn.textContent = '⚡ Generate selected sections';
+  addSaveButtons();
+  showToast('✓ Book generation complete!', 3500);
+
+  // Close modal after short delay so user sees completion
+  setTimeout(() => document.getElementById('bgen-overlay').classList.remove('open'), 1800);
 }
 
-async function createRepo() {
-  const name=document.getElementById('nr-name').value.trim(), desc=document.getElementById('nr-desc').value.trim(), localPath=document.getElementById('nr-path').value.trim(), isPrivate=document.getElementById('nr-private').checked;
-  if (!name||!localPath) return toast('Name and path required','error');
-  const btn=document.getElementById('nr-submit'); btn.disabled=true; btn.textContent='Creating…';
-  try {
-    await api('/api/repos/create','POST',{name,description:desc,isPrivate,localPath});
-    toast('Repo created ✓','success');
-    document.getElementById('new-repo-modal').style.display='none';
-    const cfg=await api('/api/config'); loadRepos(cfg.repos);
-    document.getElementById('repo-select').value=localPath; selectRepo(localPath);
-  } catch(e) { toast('Error: '+e,'error'); }
-  btn.disabled=false; btn.textContent='Create Repository';
-}
-
-async function addRepo() {
-  const localPath=document.getElementById('ar-path').value.trim();
-  if (!localPath) return toast('Path required','error');
-  try {
-    await api('/api/repos/add','POST',{localPath}); toast('Repository added','success');
-    document.getElementById('add-repo-modal').style.display='none';
-    const cfg=await api('/api/config'); loadRepos(cfg.repos);
-    document.getElementById('repo-select').value=localPath; selectRepo(localPath);
-  } catch(e) { toast('Error: '+e,'error'); }
-}
-
-async function showNetlifyLinkModal() {
-  document.getElementById('netlify-link-modal').style.display='flex';
-  const listEl=document.getElementById('netlify-sites-list');
-  listEl.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted)">Loading…</div>';
-  try {
-    const data=await api('/api/netlify/sites');
-    listEl.innerHTML=data.sites.map(s=>`<div class="link-item" onclick="linkNetlifySite('${s.id}','${s.name.replace(/'/g,"\\'")}','${(s.url||'').replace(/'/g,"\\'")}')"><div><div class="link-item-name">${s.name}</div><div class="link-item-url">${s.customDomain||s.url||''}</div></div><span class="deploy-status ${s.state==='ready'?'status-ready':'status-unknown'}">${s.state}</span></div>`).join('');
-  } catch(e) { listEl.innerHTML=`<div style="padding:20px;color:var(--deleted)">${e.message}</div>`; }
-}
-async function linkNetlifySite(siteId,siteName,siteUrl) {
-  await api('/api/netlify/link','POST',{localPath:currentRepo,siteId,siteName,siteUrl});
-  repoNetlify={siteId,siteName,siteUrl}; toast(`Linked to ${siteName}`,'success');
-  document.getElementById('netlify-link-modal').style.display='none';
-  updateDeployBar(); updateDeploySection();
-}
-async function unlinkNetlify() {
-  await api('/api/netlify/unlink','POST',{localPath:currentRepo}); repoNetlify=null;
-  toast('Netlify unlinked','info'); document.getElementById('netlify-link-modal').style.display='none';
-  updateDeployBar(); updateDeploySection();
-}
-
-async function showVercelLinkModal() {
-  document.getElementById('vercel-link-modal').style.display='flex';
-  const listEl=document.getElementById('vercel-projects-list');
-  listEl.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted)">Loading…</div>';
-  try {
-    const data=await api('/api/vercel/projects');
-    listEl.innerHTML=data.projects.map(p=>`<div class="link-item" onclick="linkVercelProject('${p.id}','${p.name.replace(/'/g,"\\'")}','${(p.url||'').replace(/'/g,"\\'")}')"><div><div class="link-item-name">${p.name}</div><div class="link-item-url">${p.url||''}</div></div></div>`).join('');
-  } catch(e) { listEl.innerHTML=`<div style="padding:20px;color:var(--deleted)">${e.message}</div>`; }
-}
-async function linkVercelProject(projectId,projectName,projectUrl) {
-  await api('/api/vercel/link','POST',{localPath:currentRepo,projectId,projectName,projectUrl});
-  repoVercel={projectId,projectName,projectUrl}; toast(`Linked to ${projectName}`,'success');
-  document.getElementById('vercel-link-modal').style.display='none';
-  updateDeployBar(); updateDeploySection();
-}
-async function unlinkVercel() {
-  await api('/api/vercel/unlink','POST',{localPath:currentRepo}); repoVercel=null;
-  toast('Vercel unlinked','info'); document.getElementById('vercel-link-modal').style.display='none';
-  updateDeployBar(); updateDeploySection();
-}
-
-async function showBranchModal() {
-  document.getElementById('branch-modal').style.display='flex';
-  const data=await api('/api/branches','POST',{localPath:currentRepo});
-  document.getElementById('branch-list').innerHTML=data.branches.map(b=>`<div style="padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px;${b===data.current?'color:var(--accent);font-weight:600':''}" onclick="switchBranch('${b}')">${b===data.current?'✓ ':''}${b}</div>`).join('');
-}
-async function switchBranch(branch) {
-  try { await api('/api/checkout','POST',{localPath:currentRepo,branch}); document.getElementById('branch-modal').style.display='none'; toast(`Switched to ${branch}`,'success'); refreshStatus(); }
-  catch(e) { toast('Error: '+e,'error'); }
-}
-async function createBranch() {
-  const name=document.getElementById('new-branch-name').value.trim();
-  if (!name) return toast('Branch name required','error');
-  try { await api('/api/checkout','POST',{localPath:currentRepo,branch:name,create:true}); document.getElementById('branch-modal').style.display='none'; document.getElementById('new-branch-name').value=''; toast(`Created & switched to ${name}`,'success'); refreshStatus(); }
-  catch(e) { toast('Error: '+e,'error'); }
-}
-
-function showPullConfirm() { document.getElementById('pull-modal').style.display='flex'; }
-async function doPull() {
-  try { await api('/api/pull','POST',{localPath:currentRepo}); document.getElementById('pull-modal').style.display='none'; toast('Pulled ✓','success'); refreshStatus(); }
-  catch(e) { toast('Error: '+e,'error'); }
-}
-
-async function viewDiff(file,el) {
-  selectedFile=file;
-  document.querySelectorAll('.file-item').forEach(i=>i.classList.remove('selected'));
-  if (el) el.classList.add('selected');
-  const view=document.getElementById('diff-view');
-  view.innerHTML='<div class="diff-header">Loading…</div>';
-  try { const data=await api('/api/diff','POST',{localPath:currentRepo,file}); renderDiff(file,data.diff); }
-  catch(e) { view.innerHTML=`<div class="diff-header">Error: ${e.message}</div>`; }
-}
-function renderDiff(file,raw) {
-  const lines=raw.split('\n');
-  let html=`<div class="diff-header">📄 ${file}</div><div class="diff-code">`;
-  lines.forEach(line=>{
-    const esc=line.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    if (line.startsWith('+')&&!line.startsWith('+++')) html+=`<div class="diff-line diff-add">${esc}</div>`;
-    else if (line.startsWith('-')&&!line.startsWith('---')) html+=`<div class="diff-line diff-remove">${esc}</div>`;
-    else if (line.startsWith('@@')) html+=`<div class="diff-line diff-hunk">${esc}</div>`;
-    else html+=`<div class="diff-line">${esc}</div>`;
+// Build transform buttons
+window.addEventListener('DOMContentLoaded', () => {
+  const grid = document.getElementById('transform-grid');
+  if (!grid) return;
+  TRANSFORMS.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'transform-btn';
+    btn.innerHTML = `<span class="tb-icon">${t.icon}</span><span class="tb-label">${t.label}</span>${t.desc}`;
+    btn.onclick = () => runTransform(t.id, btn);
+    grid.appendChild(btn);
   });
-  document.getElementById('diff-view').innerHTML=html+'</div>';
-}
-
-function showNewRepoModal() { document.getElementById('new-repo-modal').style.display='flex'; }
-function showAddRepoModal() { document.getElementById('add-repo-modal').style.display='flex'; }
-function closeModal(e,id) { if (e.target===e.currentTarget) document.getElementById(id).style.display='none'; }
-
-function toast(msg,type='info') {
-  const c=document.getElementById('toast-container'), t=document.createElement('div');
-  t.className=`toast toast-${type}`; t.textContent=msg; c.appendChild(t); setTimeout(()=>t.remove(),3500);
-}
-
-
-async function saveTelegramToken() {
-  const botToken = document.getElementById('telegram-bot-token').value.trim();
-  const chatId = document.getElementById('telegram-chat-id').value.trim();
-  if (!botToken || !chatId) return toast('Bot token and chat ID are both required', 'error');
-  try {
-    await api('/api/telegram/token', 'POST', { botToken, chatId });
-    toast('Telegram connected — check your Telegram for a test message ✓', 'success');
-    document.getElementById('telegram-bot-token').value = '';
-    document.getElementById('telegram-chat-id').value = '';
-    const cfg = await api('/api/config');
-    updateSettingsStatus(cfg);
-  } catch(e) { toast('Telegram error: ' + e.message, 'error'); }
-}
-
-async function testTelegram() {
-  try { await api('/api/telegram/test', 'POST', {}); toast('Test message sent to Telegram ✓', 'success'); }
-  catch(e) { toast('Error: ' + e.message, 'error'); }
-}
-
-function notifyDeploy(platform, repoName, status, url) {
-  const cfg_check = fetch('/api/config').then(r=>r.json()).then(cfg => {
-    if (!cfg.hasTelegram) return;
-    let msg = '';
-    if (status === 'started') msg = '🚀 <b>Deploy Started</b>\n' + repoName + ' → ' + platform;
-    else if (status === 'success') msg = '✅ <b>Deploy Success</b>\n' + repoName + ' → ' + platform + (url ? '\n🔗 ' + url : '');
-    else if (status === 'failed') msg = '❌ <b>Deploy Failed</b>\n' + repoName + ' → ' + platform;
-    if (msg) api('/api/telegram/notify', 'POST', { message: msg }).catch(()=>{});
-  });
-}
-
-async function checkUptime(url, repoName, platform) {
-  if (!url) return;
-  try { await api('/api/uptime/check', 'POST', { url, repoName, platform }); }
-  catch {}
-}
-
-async function api(url,method='GET',body=null) {
-  const opts={method,headers:{'Content-Type':'application/json'}};
-  if (body) opts.body=JSON.stringify(body);
-  const res=await fetch(url,opts); const data=await res.json();
-  if (!res.ok) throw new Error(data.error||'Unknown error');
-  return data;
-}
-
-init();
+});
 </script>
+
+<!-- BULK GENERATE FROM BOOK MODAL -->
+<div class="bgen-overlay" id="bgen-overlay" onclick="closeBulkGenModal(event)">
+  <div class="bgen-modal" onclick="event.stopPropagation()">
+    <div class="bgen-header">
+      <div class="bgen-title">📖 Generate from book</div>
+      <button class="bgen-close" onclick="closeBulkGenModal()">✕</button>
+    </div>
+    <div class="bgen-body">
+      <div class="bgen-book-badge">
+        <span>●</span>
+        <span id="bgen-book-name">Book loaded</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">Make sure your offer is filled in on the setup page. Select which sections to generate:</div>
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+        <button class="btn-sm" onclick="bgenSelectAll()">Select all</button>
+        <button class="btn-sm" onclick="bgenDeselectAll()">Deselect all</button>
+      </div>
+      <div class="bgen-section-grid" id="bgen-section-grid"></div>
+      <div class="bgen-progress" id="bgen-progress">
+        <div class="progress-bar"><div class="progress-fill" id="bgen-progress-fill" style="width:0%"></div></div>
+        <div class="progress-text" id="bgen-progress-text">Starting...</div>
+      </div>
+    </div>
+    <div class="bgen-footer">
+      <button class="btn btn-primary" id="bgen-run-btn" onclick="runFromBook()" style="flex:1">⚡ Generate selected sections</button>
+      <button class="btn btn-secondary" onclick="closeBulkGenModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
