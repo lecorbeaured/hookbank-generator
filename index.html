@@ -1454,21 +1454,27 @@ let repurposeSourceLabel = '';
 let activeTransform = null;
 
 function openRepurpose(text, label) {
-  repurposeSource = text;
   repurposeSourceLabel = label;
   activeTransform = null;
 
-  document.getElementById('rp-source-label').textContent = 'FROM: ' + label;
-  document.getElementById('rp-source').textContent = text.length > 300 ? text.slice(0, 300) + '...' : text;
-  document.getElementById('rp-output').style.display = 'none';
+  // Put a helpful excerpt in the textarea — user can edit/replace it
+  const excerpt = text.length > 400 ? text.slice(0, 400) : text;
+  const input = document.getElementById('rp-source-input');
+  input.value = excerpt;
+
+  const fromLabel = document.getElementById('rp-from-label');
+  if (fromLabel) fromLabel.textContent = label ? 'Pre-filled from: ' + label + ' — edit or replace with any single hook' : '';
+
+  document.getElementById('rp-output').className = 'repurpose-output';
   document.getElementById('rp-output').textContent = '';
   document.getElementById('rp-actions').style.display = 'none';
-
-  // Reset active state on transform buttons
   document.querySelectorAll('.transform-btn').forEach(b => b.classList.remove('active'));
 
   document.getElementById('repurpose-drawer').classList.add('open');
   document.getElementById('overlay').classList.add('show');
+
+  // Focus and select so user can immediately type/paste
+  setTimeout(() => { input.focus(); input.select(); }, 350);
 }
 
 function closeRepurpose() {
@@ -1477,7 +1483,10 @@ function closeRepurpose() {
 }
 
 async function runTransform(transformId, btn) {
-  if (!repurposeSource) return;
+  // Always read from the textarea — user controls what gets transformed
+  const sourceText = document.getElementById('rp-source-input').value.trim();
+  if (!sourceText) { showToast('⚠ Paste or type something in the box above first'); return; }
+
   const key = document.getElementById('api-key').value.trim();
   if (!key) { showToast('⚠ Add your OpenRouter API key'); return; }
 
@@ -1490,17 +1499,22 @@ async function runTransform(transformId, btn) {
   out.textContent = 'Transforming...';
   document.getElementById('rp-actions').style.display = 'none';
 
+  const labelEl = document.getElementById('rp-output-label');
+  if (labelEl) labelEl.style.display = 'block';
+
   const systemPrompt = `You are a world-class copywriter and content strategist. Transform the provided content as instructed. Be specific, punchy, and commercial. Plain text output only — no markdown, no headers, no preamble.`;
-  const userMsg = `${TRANSFORM_PROMPTS[transformId]}\n\nCONTENT TO TRANSFORM:\n${repurposeSource}`;
+  const userMsg = `${TRANSFORM_PROMPTS[transformId]}\n\nCONTENT TO TRANSFORM:\n${sourceText}`;
 
   try {
     const result = await callLLM(systemPrompt, userMsg);
     out.className = 'repurpose-output ready';
     out.textContent = result;
     document.getElementById('rp-actions').style.display = 'flex';
+    showToast('✓ Transformed!');
   } catch(e) {
     out.className = 'repurpose-output ready';
     out.textContent = 'Error: ' + e.message;
+    document.getElementById('rp-actions').style.display = 'flex';
   }
 }
 
@@ -1510,10 +1524,13 @@ function copyRepurposeOutput() {
 }
 
 function repurposeAgain() {
-  document.getElementById('rp-output').style.display = 'none';
+  const out = document.getElementById('rp-output');
+  out.className = 'repurpose-output';
+  out.textContent = '';
   document.getElementById('rp-actions').style.display = 'none';
   document.querySelectorAll('.transform-btn').forEach(b => b.classList.remove('active'));
   activeTransform = null;
+  document.getElementById('rp-source-input').focus();
 }
 
 // Patch action row to include repurpose button
@@ -1560,15 +1577,16 @@ function buildTabsIfNeeded() {
   </div>
   <div class="repurpose-body">
     <div>
-      <div class="repurpose-source-label" id="rp-source-label">SOURCE</div>
-      <div class="repurpose-source" id="rp-source"></div>
+      <div class="repurpose-source-label" id="rp-source-label">PASTE OR EDIT YOUR HOOK</div>
+      <textarea id="rp-source-input" class="repurpose-source" style="width:100%;min-height:90px;resize:vertical;font-family:inherit;font-size:13px;line-height:1.6;color:var(--text);background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;" placeholder="Paste a single hook, title, script, or any text here — then pick a transform below..."></textarea>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px" id="rp-from-label"></div>
     </div>
     <div>
       <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Transform into</div>
       <div class="transform-grid" id="transform-grid"></div>
     </div>
     <div>
-      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">Output</div>
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px" id="rp-output-label" style="display:none">Output</div>
       <div class="repurpose-output" id="rp-output"></div>
     </div>
   </div>
