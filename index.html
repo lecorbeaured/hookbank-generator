@@ -1094,9 +1094,10 @@ function buildTabsIfNeeded() {
     sec.id = 'sec-'+id;
     sec.innerHTML = `
       <div class="out-content loading" id="out-${id}">Generating ${SECTION_NAMES[id]}...</div>
-      <div class="action-row">
+      <div class="action-row" id="actions-${id}" style="display:none">
         <button class="btn-sm" onclick="copySection(${id})">📋 Copy</button>
         <button class="btn-sm" onclick="downloadSection(${id})">⬇ Download</button>
+        <button class="repurpose-btn" onclick="openRepurpose(allOutputs[${id}] || '', '${SECTION_NAMES[id]}')">⚡ Repurpose</button>
       </div>`;
     sectionsEl.appendChild(sec);
     if (i === 0) currentTabId = id;
@@ -1123,6 +1124,20 @@ function updateTabContent(id, content) {
   if (!el) return;
   el.className = 'out-content';
   el.textContent = content;
+  const row = document.getElementById('actions-'+id);
+  if (row) {
+    row.style.display = 'flex';
+    if (!row.querySelector('.save-hook-btn')) {
+      const btn = document.createElement('button');
+      btn.className = 'save-hook-btn';
+      btn.innerHTML = '💾 Save';
+      btn.onclick = () => {
+        const tag = [4,8].includes(id) ? 'pinterest' : [3,13].includes(id) ? 'tiktok' : [6].includes(id) ? 'email' : 'hook';
+        saveToLibrary(content, SECTION_NAMES[id], tag);
+      };
+      row.appendChild(btn);
+    }
+  }
 }
 
 function switchTab(id) {
@@ -1413,7 +1428,8 @@ function exportLibrary() {
 function addSaveButtons() {
   const toGen = [...selectedSections].map(Number).filter(n => SECTION_PROMPTS[n]).sort((a,b)=>a-b);
   toGen.forEach(id => {
-    const row = document.querySelector(`#sec-${id} .action-row`);
+    if (!allOutputs[id]) return;
+    const row = document.getElementById('actions-'+id);
     if (row && !row.querySelector('.save-hook-btn')) {
       const btn = document.createElement('button');
       btn.className = 'save-hook-btn';
