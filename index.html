@@ -1971,42 +1971,9 @@ function repurposeAgain() {
 
 // Patch action row to include repurpose button
 const _origBuildTabs = buildTabsIfNeeded;
-function buildTabsIfNeeded() {
-  const tabsEl = document.getElementById('output-tabs');
-  const sectionsEl = document.getElementById('output-sections');
-  tabsEl.innerHTML = '';
-  sectionsEl.innerHTML = '';
-
-  const toGen = [...selectedSections].map(Number).filter(n => SECTION_PROMPTS[n]).sort((a,b)=>a-b);
-
-  toGen.forEach((id, i) => {
-    const tab = document.createElement('div');
-    tab.className = 'tab' + (i === 0 ? ' active' : '');
-    tab.id = 'tab-'+id;
-    tab.textContent = SECTION_NAMES[id];
-    tab.onclick = () => switchTab(id);
-    tabsEl.appendChild(tab);
-
-    const sec = document.createElement('div');
-    sec.className = 'section-block' + (i === 0 ? ' active' : '');
-    sec.id = 'sec-'+id;
-    sec.innerHTML = `
-      <div class="out-content loading" id="out-${id}">Generating ${SECTION_NAMES[id]}...</div>
-      <div class="action-row">
-        <button class="btn-sm" onclick="copySection(${id})">📋 Copy</button>
-        <button class="btn-sm" onclick="downloadSection(${id})">⬇ Download</button>
-        <button class="repurpose-btn" onclick="openRepurpose(allOutputs[${id}] || '', '${SECTION_NAMES[id]}')">⚡ Repurpose</button>
-      </div>`;
-    sectionsEl.appendChild(sec);
-    if (i === 0) currentTabId = id;
-  });
-
-  updateResultsHeader();
-}
-
 // ─── BULK GENERATE FROM BOOK ────────────────────────────────────────
 
-let bgenSelected = new Set([1,2,3,4,5,6,7,8,9,10,11,12,13]);
+let bgenSelected = new Set([1,2,3,4,5,6,7,8,9,10,11,12,13,14]);
 let bgenRunning = false;
 
 function openBulkGenModal() {
